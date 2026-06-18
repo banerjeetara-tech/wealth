@@ -531,13 +531,19 @@ function cleanQuery(n){
 function pickBest(orig,results){
   if(!results||!results.length) return null;
   const wantDirect=/direct/i.test(orig), wantGrowth=!/idcw|dividend/i.test(orig);
-  let best=null,bs=-99;
+  const core=s=>s.toLowerCase().replace(/\(.*?\)/g," ")
+    .replace(/\b(direct|regular|plan|growth|option|idcw|dividend|payout|reinvestment|bonus|erstwhile|formerly|fund|the|of)\b/gi," ")
+    .replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(Boolean);
+  const ot=new Set(core(orig));
+  let best=null,bs=-1e9;
   for(const r of results){
-    const nm=r.name||""; let s=0;
-    if(/direct/i.test(nm)===wantDirect) s+=3;
-    if(wantGrowth && /growth/i.test(nm)) s+=2;
-    if(!wantGrowth && /(idcw|dividend)/i.test(nm)) s+=2;
-    if(wantGrowth && /(idcw|dividend)/i.test(nm)) s-=2;
+    const nm=r.name||"", rt=core(nm);
+    const inter=rt.filter(w=>ot.has(w)).length;
+    const union=new Set([...ot,...rt]).size||1;
+    let s=(inter/union)*10;                         // core-name similarity
+    s-=rt.filter(w=>!ot.has(w)).length*0.7;         // penalise extra words (Focused, Large &)
+    if(/direct/i.test(nm)===wantDirect) s+=2;
+    if(wantGrowth && /(bonus|idcw|dividend)/i.test(nm)) s-=4;  // avoid Bonus/IDCW when Growth
     if(s>bs){bs=s;best=r;}
   }
   return best;
