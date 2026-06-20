@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Wealth Desk</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F4F6F9;color:#0F1A2E}
+  .container{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+  .sidebar{background:#0F1A2E;color:#fff;padding:20px;display:flex;flex-direction:column;gap:20px}
+  .brand{font-size:20px;font-weight:bold;margin-bottom:10px}
+  .nav{display:flex;flex-direction:column;gap:8px}
+  .nav button{background:none;border:none;color:#fff;padding:12px;text-align:left;cursor:pointer;border-radius:8px;font-size:14px}
+  .nav button.active{background:#2F3E9E;color:#fff}
+  .nav button:hover{background:#1C2A45}
+  .content{padding:20px;overflow-y:auto}
+  .panel{background:#fff;border:1px solid #E5E9F0;border-radius:12px;padding:16px;margin-bottom:16px}
+  .panel h2{font-size:18px;margin-bottom:12px;color:#0F1A2E}
+  .panel h3{font-size:14px;color:#69728A;margin-top:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#69728A}
+  .form input{padding:10px;border:1px solid #E5E9F0;border-radius:8px;font-size:14px;font-family:inherit}
+  .form input:focus{outline:none;border-color:#2F3E9E;background:#f9f9ff}
+  .form .wide{grid-column:1/-1}
+  .metric{display:inline-block;background:#f9f9ff;border:1px solid #E5E9F0;border-radius:8px;padding:12px;margin:8px 8px 8px 0;min-width:150px}
+  .metric .value{font-size:20px;font-weight:bold;color:#2F3E9E;margin-top:4px}
+  .metric .label{font-size:11px;color:#69728A;text-transform:uppercase}
+  button.btn{background:#2F3E9E;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600}
+  button.btn:hover{background:#1C2A45}
+  .msg{text-align:center;color:#69728A;padding:20px}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+  table thead{background:#f9f9ff}
+  table th{padding:8px;text-align:left;font-weight:600;color:#69728A;border-bottom:1px solid #E5E9F0}
+  table td{padding:10px 8px;border-bottom:1px solid #E5E9F0}
+  table tr:hover{background:#f9f9ff}
+  .idea{display:flex;gap:10px;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #E5E9F0;font-size:13px;line-height:1.5}
+  .idea.ok{background:#EAF6F0;border-color:#CDE9DC;color:#0B6B49}
+  .idea.warn{background:#FCF3E7;border-color:#F0DCBE;color:#9A6B12}
+  .tag{font-weight:bold;min-width:30px}
+  .section{margin-bottom:20px}
+  .view{display:none}
+  .view.active{display:block}
+  @media(max-width:600px){
+    .container{grid-template-columns:1fr}
+    .sidebar{flex-direction:row;position:fixed;bottom:0;left:0;right:0;gap:4px;padding:8px;overflow-x:auto}
+    .content{padding:12px;padding-bottom:80px}
+    .brand{display:none}
+    .nav{flex-direction:row;width:100%}
+    .nav button{padding:8px;font-size:11px;flex:1}
+    .form{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <aside class="sidebar">
+    <div class="brand">WD</div>
+    <nav class="nav">
+      <button class="active" onclick="showTab('overview')">📊 Overview</button>
+      <button onclick="showTab('setup')">⚙️ Setup</button>
+      <button onclick="showTab('holdings')">💼 Holdings</button>
+      <button onclick="showTab('pension')">🏦 Pension</button>
+      <button onclick="showTab('expenses')">💸 Expenses</button>
+      <button onclick="showTab('insights')">💡 Insights</button>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <div id="overview" class="view active">
+      <div class="panel">
+        <h2>Overview - Your Wealth Dashboard</h2>
+        <div id="overviewContent"></div>
+      </div>
+    </div>
+
+    <div id="setup" class="view">
+      <div class="panel">
+        <h2>One-Time Setup</h2>
+        <div class="form">
+          <label>Age <input id="age" type="number" value="51"></label>
+          <label>Retirement Age <input id="retireAge" type="number" value="60"></label>
+          <label>Monthly Salary (₹) <input id="salary" type="number" value="73073"></label>
+          <label>Annual Bonus (₹) <input id="bonus" type="number" value="0"></label>
+          <label>PF Deduction (₹) <input id="pf" type="number" value="5000"></label>
+          <label>PPF Monthly (₹) <input id="ppf" type="number" value="12500"></label>
+          <label>NPS Monthly (₹) <input id="nps" type="number" value="0"></label>
+          <label>Expected Return (%) <input id="returnRate" type="number" value="8" step="0.5"></label>
+        </div>
+        <button class="btn" onclick="saveSetup()">💾 Save Setup</button>
+      </div>
+    </div>
+
+    <div id="holdings" class="view">
+      <div class="panel">
+        <h2>Your Holdings - Auto Calculated</h2>
+        <div id="holdingsContent"></div>
+      </div>
+    </div>
+
+    <div id="pension" class="view">
+      <div class="panel">
+        <h2>Retirement Planning</h2>
+        <div id="pensionContent"></div>
+      </div>
+    </div>
+
+    <div id="expenses" class="view">
+      <div class="panel">
+        <h2>Monthly Expenses</h2>
+        <div class="form">
+          <label>Grocery (₹) <input id="exp_grocery" type="number" oninput="updateExpenses()"></label>
+          <label>Spencer (₹) <input id="exp_spencer" type="number" oninput="updateExpenses()"></label>
+          <label>Electricity (₹) <input id="exp_electric" type="number" oninput="updateExpenses()"></label>
+          <label>Maid (₹) <input id="exp_maid" type="number" oninput="updateExpenses()"></label>
+          <label>Petrol (₹) <input id="exp_petrol" type="number" oninput="updateExpenses()"></label>
+          <label>Credit Card (₹) <input id="exp_cc" type="number" oninput="updateExpenses()"></label>
+          <label class="wide">Petty Expense (₹) <input id="exp_petty" type="number" oninput="updateExpenses()"></label>
+        </div>
+        <div id="expensesSummary"></div>
+      </div>
+    </div>
+
+    <div id="insights" class="view">
+      <div class="panel">
+        <h2>Smart Recommendations</h2>
+        <div id="insightsContent"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+let SETUP = {age:51, retireAge:60, salary:73073, bonus:0, pf:5000, ppf:12500, nps:0, returnRate:8};
+
+function showTab(tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  event.target.classList.add('active');
+  
+  if(tab === 'overview') renderOverview();
+  if(tab === 'holdings') renderHoldings();
+  if(tab === 'pension') renderPension();
+  if(tab === 'expenses') renderExpenses();
+  if(tab === 'insights') renderInsights();
+}
+
+function saveSetup() {
+  SETUP = {
+    age: +document.getElementById('age').value,
+    retireAge: +document.getElementById('retireAge').value,
+    salary: +document.getElementById('salary').value,
+    bonus: +document.getElementById('bonus').value,
+    pf: +document.getElementById('pf').value,
+    ppf: +document.getElementById('ppf').value,
+    nps: +document.getElementById('nps').value,
+    returnRate: +document.getElementById('returnRate').value
+  };
+  localStorage.setItem('wealth_setup', JSON.stringify(SETUP));
+  alert('✅ Setup saved! Go to Overview to see calculations.');
+  renderOverview();
+}
+
+function inr(n) {
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+
+function calcPPF() {
+  const months = (SETUP.retireAge - SETUP.age) * 12;
+  const monthly = SETUP.ppf;
+  const rate = 7.1 / 100 / 12;
+  return monthly * ((Math.pow(1+rate, months) - 1) / rate);
+}
+
+function calcPF() {
+  const months = (SETUP.retireAge - SETUP.age) * 12;
+  const empContrib = SETUP.pf;
+  const compContrib = empContrib * (8.33/8.5);
+  const total = empContrib + compContrib;
+  const rate = 8.5 / 100 / 12;
+  return total * ((Math.pow(1+rate, months) - 1) / rate);
+}
+
+function calcAPY() {
+  const months = 15 * 12;
+  const monthly = 1500;
+  const rate = 8 / 100 / 12;
+  return monthly * ((Math.pow(1+rate, months) - 1) / rate);
+}
+
+function calcNPS() {
+  if(SETUP.nps === 0) return 0;
+  const months = (SETUP.retireAge - SETUP.age) * 12;
+  const rate = SETUP.returnRate / 100 / 12;
+  return SETUP.nps * ((Math.pow(1+rate, months) - 1) / rate);
+}
+
+function getTotalExpenses() {
+  return (
+    +document.getElementById('exp_grocery').value || 0 +
+    +document.getElementById('exp_spencer').value || 0 +
+    +document.getElementById('exp_electric').value || 0 +
+    +document.getElementById('exp_maid').value || 0 +
+    +document.getElementById('exp_petrol').value || 0 +
+    +document.getElementById('exp_cc').value || 0 +
+    +document.getElementById('exp_petty').value || 0
+  );
+}
+
+function renderOverview() {
+  const ppf = calcPPF();
+  const pf = calcPF();
+  const apy = calcAPY();
+  const nps = calcNPS();
+  const totalCorpus = ppf + pf + apy + nps;
+  const monthlyIncome = SETUP.salary;
+  const expenses = getTotalExpenses();
+  const savings = monthlyIncome - expenses;
+  const savingsRate = monthlyIncome > 0 ? Math.round(savings/monthlyIncome*100) : 0;
+
+  let html = `
+    <h3>Your Financial Status</h3>
+    <div class="metric">
+      <div class="label">Total Corpus (at ${SETUP.retireAge})</div>
+      <div class="value">${inr(totalCorpus)}</div>
+    </div>
+    <div class="metric">
+      <div class="label">Monthly Income</div>
+      <div class="value">${inr(monthlyIncome)}</div>
+    </div>
+    <div class="metric">
+      <div class="label">Monthly Savings</div>
+      <div class="value">${inr(savings)}</div>
+    </div>
+    <div class="metric">
+      <div class="label">Savings Rate</div>
+      <div class="value">${savingsRate}%</div>
+    </div>
+    
+    <h3>Assets Breakdown (Auto-Calculated)</h3>
+    <table>
+      <tr><th>Asset</th><th>Value at ${SETUP.retireAge}</th><th>Rate</th></tr>
+      <tr><td>PPF</td><td>${inr(ppf)}</td><td>7.1% p.a.</td></tr>
+      <tr><td>PF</td><td>${inr(pf)}</td><td>8.5% p.a.</td></tr>
+      <tr><td>APY</td><td>${inr(apy)}</td><td>8% p.a.</td></tr>
+      <tr><td>NPS</td><td>${inr(nps)}</td><td>${SETUP.returnRate}% p.a.</td></tr>
+      <tr style="background:#f9f9ff;font-weight:bold"><td>TOTAL</td><td>${inr(totalCorpus)}</td><td>-</td></tr>
+    </table>
+    
+    <h3>Retirement Income (4% Rule)</h3>
+    <div class="metric">
+      <div class="label">Monthly at ${SETUP.retireAge}</div>
+      <div class="value">${inr(totalCorpus * 0.04 / 12)}</div>
+    </div>
+  `;
+  document.getElementById('overviewContent').innerHTML = html;
+}
+
+function renderHoldings() {
+  const ppf = calcPPF();
+  const pf = calcPF();
+  const apy = calcAPY();
+  const nps = calcNPS();
+  
+  let html = `
+    <table>
+      <tr><th>Asset</th><th>Monthly Investment</th><th>Current Value</th><th>At Retirement</th></tr>
+      <tr><td><b>PPF</b><br><small>Public Provident Fund</small></td><td>${inr(SETUP.ppf)}</td><td>Auto-Growing</td><td>${inr(ppf)}</td></tr>
+      <tr><td><b>PF</b><br><small>Provident Fund (+ Employer)</small></td><td>${inr(SETUP.pf + SETUP.pf*0.6)}</td><td>Auto-Growing</td><td>${inr(pf)}</td></tr>
+      <tr><td><b>APY</b><br><small>Atal Pension Yojana (15yr)</small></td><td>₹1,500</td><td>Auto-Growing</td><td>${inr(apy)}</td></tr>
+      <tr><td><b>NPS</b><br><small>National Pension Scheme</small></td><td>${inr(SETUP.nps)}</td><td>Auto-Growing</td><td>${inr(nps)}</td></tr>
+    </table>
+    <p class="msg">💡 All values auto-calculate based on your inputs. No manual entry needed!</p>
+  `;
+  document.getElementById('holdingsContent').innerHTML = html;
+}
+
+function renderPension() {
+  const ppf = calcPPF();
+  const pf = calcPF();
+  const apy = calcAPY();
+  const nps = calcNPS();
+  const corpus = ppf + pf + apy + nps;
+  const monthlyPension = corpus * 0.04 / 12;
+  const yrsToRetire = SETUP.retireAge - SETUP.age;
+  
+  let html = `
+    <div class="idea ok">
+      <span class="tag">✓</span>
+      <div><b>Retirement Corpus at ${SETUP.retireAge}</b><br>${inr(corpus)} (${Math.round(corpus/10000000*100)}% of ₹1Cr goal)</div>
+    </div>
+    <div class="idea ok">
+      <span class="tag">✓</span>
+      <div><b>Monthly Retirement Income</b><br>${inr(monthlyPension)} using 4% withdrawal rule</div>
+    </div>
+    <div class="idea">
+      <span class="tag">→</span>
+      <div><b>Years to Retirement</b><br>${yrsToRetire} years</div>
+    </div>
+    
+    <h3>Monthly Contributions Path</h3>
+    <table>
+      <tr><th>Contribution</th><th>Amount</th><th>Total/Month</th></tr>
+      <tr><td>Your PF</td><td>${inr(SETUP.pf)}</td><td rowspan="3">${inr(SETUP.pf + SETUP.ppf + SETUP.nps)}</td></tr>
+      <tr><td>PPF</td><td>${inr(SETUP.ppf)}</td></tr>
+      <tr><td>NPS</td><td>${inr(SETUP.nps)}</td></tr>
+    </table>
+  `;
+  document.getElementById('pensionContent').innerHTML = html;
+}
+
+function renderExpenses() {
+  const total = getTotalExpenses();
+  const income = SETUP.salary;
+  const ratio = income > 0 ? Math.round(total/income*100) : 0;
+  
+  let html = `<div class="metric">
+    <div class="label">Total This Month</div>
+    <div class="value">${inr(total)}</div>
+  </div>
+  <div class="metric">
+    <div class="label">% of Income</div>
+    <div class="value">${ratio}%</div>
+  </div>`;
+  
+  if(ratio <= 40) {
+    html += '<div class="idea ok"><span class="tag">✓</span>Excellent spending (under 40%)</div>';
+  } else if(ratio <= 60) {
+    html += '<div class="idea warn"><span class="tag">!</span>Moderate spending</div>';
+  } else {
+    html += '<div class="idea warn"><span class="tag">!</span>High spending - review needed</div>';
+  }
+  
+  document.getElementById('expensesSummary').innerHTML = html;
+}
+
+function updateExpenses() {
+  renderExpenses();
+  renderOverview();
+}
+
+function renderInsights() {
+  const ppf = calcPPF();
+  const salary = SETUP.salary;
+  const expenses = getTotalExpenses();
+  const savingsRate = salary > 0 ? Math.round((salary-expenses)/salary*100) : 0;
+  
+  let html = '<h3>Smart Recommendations</h3>';
+  
+  html += savingsRate >= 50 ? 
+    '<div class="idea ok"><span class="tag">1</span> Savings rate '+savingsRate+'% - Exceptional! Keep it up</div>' :
+    '<div class="idea warn"><span class="tag">1</span> Increase savings to 20%+ (currently '+savingsRate+'%)</div>';
+  
+  html += ppf >= 1500000 ?
+    '<div class="idea ok"><span class="tag">2</span> PPF maxed at '+inr(ppf)+' - Great!</div>' :
+    '<div class="idea warn"><span class="tag">2</span> Max out PPF ₹1.5L/year</div>';
+  
+  html += SETUP.age >= 50 ?
+    '<div class="idea warn"><span class="tag">3</span> Age '+SETUP.age+': Consider rebalancing to 60% equity, 25% debt</div>' :
+    '<div class="idea ok"><span class="tag">3</span> Asset allocation good for your age</div>';
+  
+  html += SETUP.nps === 0 ?
+    '<div class="idea warn"><span class="tag">4</span> Start NPS ₹50k/year - Tax benefit ₹15k/year</div>' :
+    '<div class="idea ok"><span class="tag">4</span> NPS: '+inr(SETUP.nps)+'/month ongoing</div>';
+  
+  html += '<div class="idea"><span class="tag">5</span> Emergency fund: Save '+inr(expenses*6)+' (6 months expenses)</div>';
+  html += '<div class="idea"><span class="tag">6</span> Section 80C: Use for PPF, Life Insurance, Education</div>';
+  html += '<div class="idea ok"><span class="tag">7</span> On track for retirement at '+SETUP.retireAge+'!</div>';
+  
+  document.getElementById('insightsContent').innerHTML = html;
+}
+
+// Load saved setup
+const saved = localStorage.getItem('wealth_setup');
+if(saved) {
+  SETUP = JSON.parse(saved);
+  document.getElementById('age').value = SETUP.age;
+  document.getElementById('retireAge').value = SETUP.retireAge;
+  document.getElementById('salary').value = SETUP.salary;
+  document.getElementById('bonus').value = SETUP.bonus;
+  document.getElementById('pf').value = SETUP.pf;
+  document.getElementById('ppf').value = SETUP.ppf;
+  document.getElementById('nps').value = SETUP.nps;
+  document.getElementById('returnRate').value = SETUP.returnRate;
+}
+
+renderOverview();
+</script>
+</body>
+</html>
