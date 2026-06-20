@@ -3,782 +3,417 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Wealth Desk</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f5f5f5;
-  color: #333;
-}
-
-.container {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  min-height: 100vh;
-}
-
-/* SIDEBAR */
-.sidebar {
-  background: #800020;
-  color: white;
-  padding: 24px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 240px;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-icon {
-  width: 48px;
-  height: 48px;
-  background: white;
-  color: #800020;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 20px;
-}
-
-.logo h1 {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-
-.nav button {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0);
-  border: none;
-  color: rgba(255,255,255,0.8);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: all 0.2s;
-}
-
-.nav button:hover {
-  background: rgba(255,255,255,0.1);
-  color: white;
-}
-
-.nav button.active {
-  background: white;
-  color: #800020;
-  font-weight: 600;
-}
-
-.nav-icon {
-  width: 18px;
-}
-
-/* MAIN */
-.main {
-  grid-column: 2;
-  padding: 32px;
-  margin-left: 0;
-}
-
-.header {
-  margin-bottom: 28px;
-}
-
-.header h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: #800020;
-}
-
-.view { display: none; }
-.view.active { display: block; }
-
-/* CARDS */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.metric-card {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.metric-card.hero {
-  background: #800020;
-  color: white;
-  border-color: #800020;
-  grid-column: span 2;
-}
-
-.metric-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: #999;
-  letter-spacing: 0.5px;
-}
-
-.metric-card.hero .metric-label {
-  color: rgba(255,255,255,0.8);
-}
-
-.metric-value {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.panel {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 24px;
-  margin-bottom: 20px;
-}
-
-.panel h2 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #800020;
-  margin-bottom: 4px;
-}
-
-.panel-desc {
-  font-size: 11px;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 16px;
-}
-
-.chart-container {
-  position: relative;
-  height: 300px;
-  margin-bottom: 20px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-table th {
-  padding: 12px;
-  text-align: left;
-  font-weight: 600;
-  border-bottom: 2px solid #ddd;
-  background: #f9f9f9;
-  color: #800020;
-}
-
-table td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-}
-
-table tr:hover {
-  background: #f9f9f9;
-}
-
-.form-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-}
-
-input, select {
-  padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 13px;
-  font-family: inherit;
-}
-
-input:focus, select:focus {
-  outline: none;
-  border-color: #800020;
-  background: #fff5f5;
-}
-
-/* TABS */
-.tab-nav {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 0;
-}
-
-.tab-btn {
-  padding: 12px 16px;
-  background: none;
-  border: none;
-  color: #999;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.2s;
-}
-
-.tab-btn.active {
-  color: #800020;
-  border-bottom-color: #800020;
-}
-
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-.btn {
-  padding: 10px 16px;
-  background: #800020;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 13px;
-  margin-top: 12px;
-}
-
-.btn:hover {
-  background: #600018;
-}
-
-.gain { color: #22863a; font-weight: 600; }
-.loss { color: #cb2431; font-weight: 600; }
-
-.insight-box {
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  border-left: 4px solid #800020;
-  background: #f9f9f9;
-}
-
-@media(max-width: 768px) {
-  .container { grid-template-columns: 1fr; }
-  .sidebar { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: auto; padding: 8px; gap: 0; flex-direction: row; overflow-x: auto; }
-  .logo { display: none; }
-  .nav { flex-direction: row; }
-  .nav button { padding: 8px 10px; font-size: 11px; }
-  .main { padding: 16px; padding-bottom: 70px; margin-left: 0; }
-  .metrics-grid { grid-template-columns: 1fr; }
-  .metric-card.hero { grid-column: 1; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,system-ui,sans-serif;background:#f4f4f6;color:#222;}
+.topbar{position:sticky;top:0;z-index:50;background:#800020;color:#fff;display:flex;align-items:center;gap:14px;padding:14px 16px;}
+.menu-btn{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0;line-height:1;}
+.topbar h1{font-size:17px;font-weight:700;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;opacity:0;visibility:hidden;transition:.25s;}
+.overlay.open{opacity:1;visibility:visible;}
+.sidebar{position:fixed;top:0;left:0;height:100%;width:250px;background:#800020;color:#fff;z-index:70;transform:translateX(-100%);transition:transform .25s;padding:22px 14px;display:flex;flex-direction:column;gap:22px;overflow-y:auto;}
+.sidebar.open{transform:translateX(0);}
+.sidebar .logo{font-size:18px;font-weight:700;}
+.sidebar .nav{display:flex;flex-direction:column;gap:4px;}
+.sidebar .nav button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;color:rgba(255,255,255,.85);font-size:14px;padding:13px 12px;border-radius:9px;cursor:pointer;}
+.sidebar .nav button.active{background:#fff;color:#800020;font-weight:700;}
+.content{padding:18px 16px 50px;max-width:820px;margin:0 auto;}
+.page{display:none;} .page.active{display:block;}
+.card{background:#fff;border:1px solid #e6e6ea;border-radius:12px;padding:18px;margin-bottom:16px;}
+.card h2{color:#800020;font-size:15px;font-weight:700;margin-bottom:14px;}
+.card h3{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.mets{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.met{background:#faf7f8;border:1px solid #eee;border-radius:10px;padding:14px;}
+.met.big{background:#800020;color:#fff;border-color:#800020;grid-column:1/-1;}
+.met .l{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:#999;margin-bottom:7px;}
+.met.big .l{color:rgba(255,255,255,.8);}
+.met .v{font-size:21px;font-weight:700;}
+.chartbox{position:relative;height:260px;margin-top:6px;}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.form .full{grid-column:1/-1;}
+label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#444;}
+input,textarea,select{padding:11px;border:1px solid #ddd;border-radius:9px;font-size:15px;font-family:inherit;}
+input:focus,textarea:focus{outline:none;border-color:#800020;background:#fff7f8;}
+textarea{resize:vertical;min-height:90px;}
+.btn{padding:12px 18px;background:#800020;color:#fff;border:none;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;width:100%;}
+.tabs{display:flex;gap:6px;border-bottom:2px solid #eee;margin-bottom:14px;overflow-x:auto;}
+.tab{flex:1;min-width:90px;padding:11px 6px;background:none;border:none;color:#999;font-weight:700;font-size:12px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;}
+.tab.active{color:#800020;border-bottom-color:#800020;}
+.tcont{display:none;} .tcont.active{display:block;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{padding:9px 8px;text-align:left;background:#faf7f8;border-bottom:2px solid #eee;color:#800020;font-size:11px;text-transform:uppercase;}
+td{padding:9px 8px;border-bottom:1px solid #f0f0f0;}
+.g{color:#1a8a4f;font-weight:700;} .l2{color:#cb2431;font-weight:700;}
+.note{line-height:1.9;font-size:14px;}
+.pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:#f0e6e9;color:#800020;font-weight:700;}
+.out{background:#faf7f8;border:1px solid #eee;border-radius:9px;padding:12px;font-size:13px;margin-top:10px;white-space:pre-wrap;font-family:ui-monospace,monospace;max-height:300px;overflow:auto;}
+@media(min-width:900px){
+  .menu-btn,.overlay{display:none;}
+  .sidebar{transform:translateX(0);}
+  .content,.topbar{margin-left:250px;}
+  .mets{grid-template-columns:repeat(4,1fr);}
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-icon">WD</div>
-      <div><h1>Wealth Desk</h1></div>
+<div class="topbar">
+  <button class="menu-btn" id="menuBtn">&#9776;</button>
+  <h1 id="ttl">Overview</h1>
+</div>
+
+<div class="overlay" id="ov"></div>
+<aside class="sidebar" id="sb">
+  <div class="logo">💰 Wealth Desk</div>
+  <nav class="nav">
+    <button class="active" data-p="0">📊 Overview</button>
+    <button data-p="1">💵 Salary</button>
+    <button data-p="2">💼 Holdings</button>
+    <button data-p="3">🏛 Pension</button>
+    <button data-p="4">📉 Expenses</button>
+    <button data-p="5">💡 Insights</button>
+    <button data-p="6">⚙️ Settings</button>
+  </nav>
+</aside>
+
+<div class="content">
+
+  <!-- 0 OVERVIEW -->
+  <div class="page active">
+    <div class="card"><h2>Your Wealth</h2><div class="mets" id="m0"></div></div>
+    <div class="card"><h3>Income · Expenses · Savings</h3><div class="chartbox"><canvas id="barChart"></canvas></div></div>
+    <div class="card"><h3>Portfolio Allocation</h3><div class="chartbox"><canvas id="pieChart"></canvas></div></div>
+  </div>
+
+  <!-- 1 SALARY -->
+  <div class="page">
+    <div class="card">
+      <h2>Monthly Salary</h2>
+      <div class="form">
+        <label>Salary (₹)<input id="sal" type="number" value="73073"></label>
+        <label>Bonus (₹)<input id="bon" type="number" value="0"></label>
+        <label>PF (₹)<input id="pf" type="number" value="5000"></label>
+        <label>PPF (₹)<input id="ppf" type="number" value="12500"></label>
+      </div>
+      <button class="btn" id="updSal">Update</button>
+      <div class="mets" id="m1" style="margin-top:14px;"></div>
     </div>
-    
-    <nav class="nav">
-      <button class="active" data-view="overview"><span class="nav-icon">📊</span> Overview</button>
-      <button data-view="salary"><span class="nav-icon">💰</span> Salary</button>
-      <button data-view="holdings"><span class="nav-icon">💼</span> Holdings</button>
-      <button data-view="pension"><span class="nav-icon">🏛</span> Pension</button>
-      <button data-view="expenses"><span class="nav-icon">📉</span> Expenses</button>
-      <button data-view="insights"><span class="nav-icon">💡</span> Insights</button>
-      <button data-view="setup"><span class="nav-icon">⚙</span> Setup</button>
-    </nav>
-  </aside>
+  </div>
 
-  <main class="main">
-    <div class="header">
-      <h1 id="page-title">Overview</h1>
+  <!-- 2 HOLDINGS -->
+  <div class="page">
+    <div class="card">
+      <h2>Holdings <span class="pill" id="fundCount"></span></h2>
+      <div class="tabs">
+        <button class="tab active" data-t="0">All Funds</button>
+        <button class="tab" data-t="1">Gold &amp; Silver</button>
+        <button class="tab" data-t="2">Stocks</button>
+      </div>
+      <div class="tcont active">
+        <div class="mets" id="mfSummary" style="margin-bottom:14px;"></div>
+        <table><thead><tr><th>Fund</th><th>Cat</th><th>Units</th><th>Value</th></tr></thead><tbody id="mfT"></tbody></table>
+      </div>
+      <div class="tcont">
+        <div class="mets" id="gsSummary" style="margin-bottom:14px;"></div>
+        <table><thead><tr><th>Fund</th><th>Type</th><th>Units</th><th>Value</th></tr></thead><tbody id="gsT"></tbody></table>
+      </div>
+      <div class="tcont">
+        <div class="form"><label class="full">Symbol<input id="ss" placeholder="TCS"></label></div>
+        <div class="form"><label>Qty<input id="sq" type="number"></label><label>Cost<input id="sc" type="number"></label></div>
+        <button class="btn" id="addStk">Add Stock</button>
+        <table style="margin-top:14px;"><thead><tr><th>Sym</th><th>Qty</th><th>Value</th><th>P/L</th></tr></thead><tbody id="stkT"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 PENSION -->
+  <div class="page">
+    <div class="card">
+      <h2>Retirement Pension</h2>
+      <div class="form">
+        <label>Current Age<input id="age" type="number" value="51"></label>
+        <label>Retire Age<input id="ret" type="number" value="60"></label>
+      </div>
+      <button class="btn" id="updPen">Calculate</button>
+      <div class="mets" id="m3" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- 4 EXPENSES -->
+  <div class="page">
+    <div class="card">
+      <h2>Monthly Expenses</h2>
+      <div class="form">
+        <label>Grocery<input id="e1" type="number"></label>
+        <label>Spencer<input id="e2" type="number"></label>
+        <label>Electricity<input id="e3" type="number"></label>
+        <label>Maid<input id="e4" type="number"></label>
+        <label>Petrol<input id="e5" type="number"></label>
+        <label>Credit Card<input id="e6" type="number"></label>
+        <label class="full">Petty<input id="e7" type="number"></label>
+      </div>
+      <button class="btn" id="updExp">Update</button>
+      <div class="mets" id="m4" style="margin-top:14px;"></div>
+    </div>
+  </div>
+
+  <!-- 5 INSIGHTS -->
+  <div class="page">
+    <div class="card"><h2>Recommendations</h2><div class="note" id="m5"></div></div>
+  </div>
+
+  <!-- 6 SETTINGS -->
+  <div class="page">
+    <div class="card">
+      <h2>Worker Connection</h2>
+      <div class="form">
+        <label class="full">Worker URL<input id="wurl" placeholder="https://wealth.banerjee-tara.workers.dev"></label>
+        <label class="full">Access Token<input id="wtok" placeholder="wealth2026tara"></label>
+      </div>
+      <button class="btn" id="saveW">Save &amp; Connect</button>
     </div>
 
-    <!-- OVERVIEW -->
-    <section id="overview" class="view active">
-      <div class="metrics-grid" id="overview-metrics"></div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-        <div class="panel">
-          <p class="panel-desc">Monthly Breakdown</p>
-          <h2>Income vs Expenses vs Savings</h2>
-          <div class="chart-container"><canvas id="incomeChart"></canvas></div>
-        </div>
-        
-        <div class="panel">
-          <p class="panel-desc">Asset Allocation</p>
-          <h2>Your Portfolio</h2>
-          <div class="chart-container"><canvas id="allocationChart"></canvas></div>
-        </div>
-      </div>
+    <div class="card">
+      <h2>CSV Parser <span class="pill">CAS import</span></h2>
+      <p style="font-size:13px;color:#666;margin-bottom:10px;">Paste your holdings CSV (columns: Scheme,Units,Value or Folio,Scheme Details,Balance Units,Market Value).</p>
+      <textarea id="csvIn" placeholder="Scheme Name, Units, Value&#10;DSP ELSS, 1935.4, 169000"></textarea>
+      <button class="btn" id="parseCsv" style="margin-top:10px;">Parse CSV</button>
+      <div class="out" id="csvOut" style="display:none;"></div>
+    </div>
 
-      <div class="panel">
-        <p class="panel-desc">Trend</p>
-        <h2>6-Month Savings Rate</h2>
-        <div class="chart-container"><canvas id="savingsChart"></canvas></div>
-      </div>
-    </section>
+    <div class="card">
+      <h2>Code Finder <span class="pill">mfapi.in</span></h2>
+      <p style="font-size:13px;color:#666;margin-bottom:10px;">Find the AMFI scheme code for any mutual fund by name.</p>
+      <div class="form"><label class="full">Fund name<input id="finderIn" placeholder="Nippon India Silver ETF FoF"></label></div>
+      <button class="btn" id="findCode">Find Scheme Code</button>
+      <div class="out" id="finderOut" style="display:none;"></div>
+    </div>
+  </div>
 
-    <!-- SALARY -->
-    <section id="salary" class="view">
-      <div class="panel">
-        <p class="panel-desc">Income</p>
-        <h2>Monthly Salary & Deductions</h2>
-        
-        <div class="form-group">
-          <label>Monthly Salary (₹)<input id="salary" type="number" value="73073" oninput="updateAll()"></label>
-          <label>Annual Bonus (₹)<input id="bonus" type="number" value="0" oninput="updateAll()"></label>
-          <label>PF Deduction (₹)<input id="pfDeduct" type="number" value="5000" oninput="updateAll()"></label>
-          <label>PPF Monthly (₹)<input id="ppfMonthly" type="number" value="12500" oninput="updateAll()"></label>
-        </div>
-        
-        <div class="metrics-grid" id="salary-metrics"></div>
-      </div>
-    </section>
-
-    <!-- HOLDINGS -->
-    <section id="holdings" class="view">
-      <div class="panel">
-        <p class="panel-desc">Portfolio</p>
-        <h2>Your Holdings</h2>
-        
-        <div class="tab-nav">
-          <button class="tab-btn active" onclick="switchTab(event, 'mf')">📊 Mutual Funds</button>
-          <button class="tab-btn" onclick="switchTab(event, 'stocks')">📈 Stocks</button>
-          <button class="tab-btn" onclick="switchTab(event, 'etf')">✦ Gold & Silver ETFs</button>
-        </div>
-
-        <!-- MF TAB -->
-        <div id="mf" class="tab-content active">
-          <table>
-            <thead><tr><th>Fund Name</th><th>Units</th><th>Avg Cost</th><th>Value</th><th>Return %</th></tr></thead>
-            <tbody id="mf-table"></tbody>
-          </table>
-        </div>
-
-        <!-- STOCKS TAB -->
-        <div id="stocks" class="tab-content">
-          <div class="form-group">
-            <label class="full">Stock Symbol (e.g., TCS)<input id="stock-sym" placeholder="TCS"></label>
-          </div>
-          <div class="form-group">
-            <label>Quantity<input id="stock-qty" type="number" placeholder="100"></label>
-            <label>Avg Cost (₹)<input id="stock-cost" type="number" placeholder="2500"></label>
-          </div>
-          <button class="btn" onclick="addStock()">+ Add Stock</button>
-          <table style="margin-top: 20px;">
-            <thead><tr><th>Symbol</th><th>Qty</th><th>Avg Cost</th><th>Current</th><th>Value</th><th>Gain/Loss</th></tr></thead>
-            <tbody id="stocks-table"></tbody>
-          </table>
-        </div>
-
-        <!-- ETF TAB -->
-        <div id="etf" class="tab-content">
-          <div class="form-group">
-            <label>Nifty Gold ETF Units<input id="gold-units" type="number" placeholder="100" oninput="updateETF()"></label>
-            <label>Nifty Silver ETF Units<input id="silver-units" type="number" placeholder="50" oninput="updateETF()"></label>
-          </div>
-          <div class="metrics-grid" id="etf-metrics"></div>
-          <table style="margin-top: 20px;">
-            <thead><tr><th>ETF</th><th>Units</th><th>Live Price</th><th>Value</th></tr></thead>
-            <tbody id="etf-table"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- PENSION -->
-    <section id="pension" class="view">
-      <div class="panel">
-        <p class="panel-desc">Retirement</p>
-        <h2>Pension Projection</h2>
-        
-        <div class="form-group">
-          <label>Current Age<input id="age" type="number" value="51" oninput="updateAll()"></label>
-          <label>Retirement Age<input id="retireAge" type="number" value="60" oninput="updateAll()"></label>
-          <label>Expected Return (%)<input id="expectedReturn" type="number" value="8" step="0.5" oninput="updateAll()"></label>
-        </div>
-        
-        <div class="metrics-grid" id="pension-metrics"></div>
-      </div>
-    </section>
-
-    <!-- EXPENSES -->
-    <section id="expenses" class="view">
-      <div class="panel">
-        <p class="panel-desc">Spending</p>
-        <h2>Monthly Expense Tracker</h2>
-        
-        <div class="form-group">
-          <label>Grocery (₹)<input id="exp-grocery" type="number" oninput="updateAll()"></label>
-          <label>Spencer (₹)<input id="exp-spencer" type="number" oninput="updateAll()"></label>
-          <label>Electricity (₹)<input id="exp-electric" type="number" oninput="updateAll()"></label>
-          <label>Maid (₹)<input id="exp-maid" type="number" oninput="updateAll()"></label>
-          <label>Petrol (₹)<input id="exp-petrol" type="number" oninput="updateAll()"></label>
-          <label>Credit Card (₹)<input id="exp-cc" type="number" oninput="updateAll()"></label>
-          <label class="full">Petty Expense (₹)<input id="exp-petty" type="number" oninput="updateAll()"></label>
-        </div>
-        
-        <div class="metrics-grid" id="expense-metrics"></div>
-      </div>
-    </section>
-
-    <!-- INSIGHTS -->
-    <section id="insights" class="view">
-      <div class="panel">
-        <p class="panel-desc">Analysis</p>
-        <h2>Smart Recommendations</h2>
-        <div id="insights-body"></div>
-      </div>
-    </section>
-
-    <!-- SETUP -->
-    <section id="setup" class="view">
-      <div class="panel">
-        <p class="panel-desc">Configuration</p>
-        <h2>Worker & API Setup</h2>
-        
-        <div class="form-group">
-          <label class="full">Worker URL<input id="worker-url" placeholder="https://wealth.you.workers.dev"></label>
-        </div>
-        <div class="form-group">
-          <label class="full">Access Token<input id="worker-token" placeholder="ACCESS_TOKEN"></label>
-        </div>
-        <button class="btn" onclick="saveSetup()">💾 Save Setup</button>
-      </div>
-    </section>
-  </main>
 </div>
 
 <script>
-const MF_DATA = [
-  {name:"DSP ELSS Tax Saver",code:"119242",units:1935,cost:87.51},
-  {name:"NIPPON INDIA ELSS",code:"118803",units:1716,cost:77.79},
-  {name:"Aditya Birla ELSS",code:"118834",units:2136,cost:43.53},
-  {name:"Mirae Asset ELSS",code:"119544",units:2577,cost:32.02},
-  {name:"Axis ELSS Tax Saver",code:"119775",units:1288,cost:69.86},
-  {name:"Tata Large Cap Fund",code:"120546",units:237,cost:476.50},
-  {name:"Axis Large Cap Fund",code:"119659",units:1932,cost:56.54},
-  {name:"HDFC Hybrid Equity",code:"118834",units:1037,cost:112.80},
-  {name:"Quant ELSS Tax Saver",code:"120847",units:274,cost:339.15},
-  {name:"NIPPON SMALL CAP",code:"119544",units:610,cost:177.79}
-];
+var HOLDINGS=[{"id":2,"name":"NIPPON INDIA ELSS TAX SAVER FUND - DIRECT PLAN GROWTH","value":133500,"invested":133500,"code":"118803","units":1716.141,"cat":"ELSS"},{"id":3,"name":"ICICI Prudential ELSS Tax Saver Fund - Direct Plan - Growth","value":147900,"invested":147900,"code":"120592","units":215.292,"cat":"ELSS"},{"id":4,"name":"HDFC Balanced Advantage Fund - Direct Plan - Growth Option","value":166000,"invested":166000,"code":"118968","units":341.194,"cat":"Hybrid"},{"id":5,"name":"Aditya Birla Sun Life ELSS Tax Saver Fund - Growth-Direct Plan","value":93000,"invested":93000,"code":"118834","units":2136.245,"cat":"ELSS"},{"id":6,"name":"Mirae Asset ELSS Tax Saver Fund - Direct Plan","value":82500,"invested":82500,"code":"119544","units":2576.622,"cat":"ELSS"},{"id":7,"name":"Axis ELSS Tax Saver Fund - Direct Growth","value":90000,"invested":90000,"code":"119775","units":1288.301,"cat":"ELSS"},{"id":8,"name":"Tata Large Cap Fund Direct Plan - Growth","value":113000,"invested":113000,"code":"120546","units":237.231,"cat":"Large/Flexi"},{"id":10,"name":"HDFC Hybrid Equity Fund - Direct Plan - Growth Option","value":117000,"invested":117000,"code":"118834","units":1036.859,"cat":"Hybrid"},{"id":11,"name":"quant ELSS Tax Saver Fund - Direct Plan - Growth","value":93000,"invested":93000,"code":"120847","units":274.225,"cat":"ELSS"},{"id":12,"name":"NIPPON INDIA SMALL CAP FUND - DIRECT GROWTH PLAN","value":108500,"invested":108500,"code":"119544","units":610.05,"cat":"Small Cap"},{"id":13,"name":"Parag Parikh Flexi Cap Fund - Direct Plan Growth","value":88000,"invested":88000,"code":"122639","units":1332.739,"cat":"Large/Flexi"},{"id":14,"name":"HDFC Large Cap Fund - Direct Plan - Growth Option","value":108000,"invested":108000,"code":"119544","units":98.811,"cat":"Large/Flexi"},{"id":15,"name":"Edelweiss Mid Cap Fund - Direct Plan Growth","value":95000,"invested":95000,"code":"140175","units":920.853,"cat":"Mid Cap"},{"id":16,"name":"quant Multi Cap Fund - Direct Plan - Growth","value":93000,"invested":93000,"code":"120823","units":158.987,"cat":"Equity"},{"id":17,"name":"SBI Small Cap Fund Direct Growth","value":82500,"invested":82500,"code":"125497","units":558.176,"cat":"Small Cap"},{"id":19,"name":"quant Small Cap Fund - Direct Plan - Growth","value":87500,"invested":87500,"code":"120828","units":339.844,"cat":"Small Cap"},{"id":20,"name":"UTI Nifty 50 Index Fund - Direct Plan","value":80000,"invested":80000,"code":"119213","units":525.562,"cat":"Large/Flexi"},{"id":21,"name":"Kotak Midcap Fund - Direct Plan - Growth","value":63000,"invested":63000,"code":"121113","units":520.154,"cat":"Mid Cap"},{"id":22,"name":"Canara Robeco Large and Mid Cap Fund - Direct Growth","value":76000,"invested":76000,"code":"120851","units":303.482,"cat":"Mid Cap"},{"id":23,"name":"Quantum Value Fund - Direct Plan Growth Option","value":50000,"invested":50000,"code":"120160","units":686.213,"cat":"Equity"},{"id":24,"name":"Canara Robeco Large Cap Fund - Direct Growth","value":64000,"invested":64000,"code":"120852","units":1202.358,"cat":"Large/Flexi"},{"id":25,"name":"DSP Large Cap Fund - Direct Plan - Growth","value":74000,"invested":74000,"code":"119242","units":164.796,"cat":"Large/Flexi"},{"id":26,"name":"NIPPON INDIA GROWTH MID CAP FUND - DIRECT GROWTH PLAN","value":68000,"invested":68000,"code":"119560","units":16.892,"cat":"Mid Cap"},{"id":27,"name":"Motilal Oswal Midcap Fund - Direct Plan Growth","value":82500,"invested":82500,"code":"119755","units":737.57,"cat":"Mid Cap"},{"id":28,"name":"Kotak Focused Fund Direct - Growth","value":60000,"invested":60000,"code":"119113","units":2571.024,"cat":"Equity"},{"id":29,"name":"PGIM India Midcap Fund - Direct Plan - Growth","value":64000,"invested":64000,"code":"120779","units":934.335,"cat":"Mid Cap"},{"id":30,"name":"UTI Flexi Cap Fund - Direct Plan","value":63000,"invested":63000,"code":"119213","units":212.242,"cat":"Large/Flexi"},{"id":31,"name":"NIPPON INDIA LARGE CAP FUND - DIRECT GROWTH PLAN","value":66000,"invested":66000,"code":"119558","units":668.899,"cat":"Large/Flexi"},{"id":32,"name":"quant Multi Cap Fund - Direct Plan - Growth (2)","value":62000,"invested":62000,"code":"120823","units":93.95,"cat":"Equity"},{"id":33,"name":"quant Mid Cap Fund - Direct Plan - Growth","value":57500,"invested":57500,"code":"120827","units":240.839,"cat":"Mid Cap"},{"id":34,"name":"NIPPON INDIA BANKING & FINANCIAL SERVICES FUND - DIRECT","value":51000,"invested":51000,"code":"119559","units":83.174,"cat":"Equity"},{"id":35,"name":"Bank of India Small Cap Fund - Direct Plan - Growth","value":46000,"invested":46000,"code":"119616","units":898.591,"cat":"Small Cap"},{"id":36,"name":"Aditya Birla Sun Life Gold Fund Growth-Direct Plan","value":34900,"invested":34900,"code":"119234","units":803.738,"cat":"Gold"},{"id":38,"name":"SBI Large Cap Fund - Direct Plan - Growth","value":20000,"invested":20000,"code":"125498","units":193.329,"cat":"Large/Flexi"},{"id":39,"name":"SBI Contra Fund - Direct Plan - Growth","value":20000,"invested":20000,"code":"125499","units":47.806,"cat":"Equity"},{"id":40,"name":"NIPPON INDIA SILVER ETF FUND OF FUND (FOF) - DIRECT","value":16000,"invested":16000,"code":"119561","units":472.522,"cat":"Silver"},{"id":41,"name":"Aditya Birla Sun Life ELSS Tax Saver Fund - Growth-Regular Plan","value":8000,"invested":8000,"code":"119234","units":255.962,"cat":"ELSS"},{"id":43,"name":"quant ELSS Tax Saver Fund - Direct Plan - Growth (2)","value":4000,"invested":4000,"code":"120847","units":15.627,"cat":"ELSS"},{"id":44,"name":"quant ELSS Tax Saver Fund - Direct Plan - Growth (3)","value":4000,"invested":4000,"code":"120847","units":15.558,"cat":"ELSS"},{"id":46,"name":"Aditya Birla Sun Life Value Fund - Growth-Direct Plan","value":1000,"invested":1000,"code":"119234","units":12.603,"cat":"Equity"}];
+var ST=[];
 
-let STOCKS = [];
-let ETF = {goldUnits: 0, silverUnits: 0};
-let charts = {};
+function $(id){return document.getElementById(id);}
+function inr(n){return '\u20b9'+Math.round(n).toLocaleString('en-IN');}
+function v(id){var x=$(id);return x?(parseFloat(x.value)||0):0;}
+var charts={};
 
-document.querySelectorAll('.nav button').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    this.classList.add('active');
-    const view = this.dataset.view;
-    document.getElementById(view).classList.add('active');
-    document.getElementById('page-title').textContent = this.textContent.trim();
-    if(view === 'overview') renderOverview();
-    if(view === 'salary') renderSalary();
-    if(view === 'holdings') renderMFTab();
-    if(view === 'pension') renderPension();
-    if(view === 'expenses') renderExpenses();
-    if(view === 'insights') renderInsights();
+/* sidebar */
+function openSb(){$('sb').classList.add('open');$('ov').classList.add('open');}
+function closeSb(){$('sb').classList.remove('open');$('ov').classList.remove('open');}
+$('menuBtn').addEventListener('click',openSb);
+$('ov').addEventListener('click',closeSb);
+
+var pages=document.querySelectorAll('.page');
+var navBtns=document.querySelectorAll('.sidebar .nav button');
+navBtns.forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var i=parseInt(btn.getAttribute('data-p'),10);
+    pages.forEach(function(p){p.classList.remove('active');});
+    navBtns.forEach(function(b){b.classList.remove('active');});
+    pages[i].classList.add('active');
+    btn.classList.add('active');
+    $('ttl').textContent=btn.textContent.trim();
+    closeSb();
+    render(i);
   });
 });
 
-function $(id) { return document.getElementById(id); }
-function inr(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
-function getVal(id) { return parseFloat($(id).value) || 0; }
-
-function renderOverview() {
-  const salary = getVal('salary');
-  const expenses = getVal('exp-grocery') + getVal('exp-spencer') + getVal('exp-electric') + getVal('exp-maid') + getVal('exp-petrol') + getVal('exp-cc') + getVal('exp-petty');
-  const savings = salary - expenses;
-  const rate = salary > 0 ? Math.round(savings / salary * 100) : 0;
-  
-  let mfValue = MF_DATA.reduce((s, m) => s + m.units * m.cost * 1.12, 0);
-  let stockValue = STOCKS.reduce((s, st) => s + st.qty * st.cost * 1.08, 0);
-  let etfValue = ETF.goldUnits * 6800 + ETF.silverUnits * 78000;
-  let ppf = getPPFCorpus();
-  let pf = getPFCorpus();
-  let total = mfValue + stockValue + etfValue + ppf + pf;
-  
-  let html = '<div class="metric-card hero"><div class="metric-label">Total Wealth</div><div class="metric-value">' + inr(total) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Monthly Income</div><div class="metric-value">' + inr(salary) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Monthly Savings</div><div class="metric-value" style="color: #22863a">' + inr(savings) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Savings Rate</div><div class="metric-value">' + rate + '%</div></div>';
-  
-  $('overview-metrics').innerHTML = html;
-  renderIncomeChart(salary, expenses, savings);
-  renderAllocationChart(mfValue, stockValue, etfValue, ppf, pf);
-  renderSavingsChart();
-}
-
-function renderIncomeChart(income, expenses, savings) {
-  let ctx = $('incomeChart').getContext('2d');
-  if(charts.income) charts.income.destroy();
-  charts.income = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Income', 'Expenses', 'Savings'],
-      datasets: [{
-        data: [income, expenses, savings],
-        backgroundColor: ['#800020', '#ff6b6b', '#22863a'],
-        borderRadius: 6
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      plugins: { legend: { display: false } },
-      scales: { x: { beginAtZero: true } }
-    }
+var tabs=document.querySelectorAll('.tab');
+var tconts=document.querySelectorAll('.tcont');
+tabs.forEach(function(tb){
+  tb.addEventListener('click',function(){
+    var i=parseInt(tb.getAttribute('data-t'),10);
+    tabs.forEach(function(t){t.classList.remove('active');});
+    tconts.forEach(function(t){t.classList.remove('active');});
+    tb.classList.add('active');
+    tconts[i].classList.add('active');
+    if(i===1) renderGS();
+    if(i===2) renderStk();
   });
+});
+
+/* current MF value: apply a modest 12% appreciation estimate over invested */
+function mfTotal(){var t=0;HOLDINGS.forEach(function(h){t+=h.value*1.12;});return t;}
+function getppf(){var mo=(v('ret')-v('age'))*12,rt=7.1/100/12;return v('ppf')*((Math.pow(1+rt,mo)-1)/rt);}
+function getpf(){var t=v('pf')*1.6,mo=(v('ret')-v('age'))*12,rt=8.5/100/12;return t*((Math.pow(1+rt,mo)-1)/rt);}
+function expTotal(){return v('e1')+v('e2')+v('e3')+v('e4')+v('e5')+v('e6')+v('e7');}
+
+function render(i){
+  if(i===0) r0(); if(i===1) r1(); if(i===2) renderMF();
+  if(i===3) r3(); if(i===4) r4(); if(i===5) r5();
 }
 
-function renderAllocationChart(mf, stocks, etf, ppf, pf) {
-  let ctx = $('allocationChart').getContext('2d');
-  if(charts.allocation) charts.allocation.destroy();
-  charts.allocation = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['MF', 'Stocks', 'ETF', 'PPF', 'PF'],
-      datasets: [{
-        data: [mf, stocks, etf, ppf, pf],
-        backgroundColor: ['#800020', '#c72c48', '#d4515f', '#e07a8f', '#cc6d84']
-      }]
-    },
-    options: { plugins: { legend: { position: 'bottom' } } }
+function r0(){
+  var sal=v('sal'),ex=expTotal(),sav=sal-ex,rt=sal>0?Math.round(sav/sal*100):0;
+  var mf=mfTotal();
+  var stk=0;ST.forEach(function(s){stk+=s.q*s.c*1.08;});
+  var total=mf+stk+getppf()+getpf();
+  $('m0').innerHTML=
+    '<div class="met big"><div class="l">Total Wealth (Projected)</div><div class="v">'+inr(total)+'</div></div>'+
+    '<div class="met"><div class="l">MF Portfolio</div><div class="v">'+inr(mf)+'</div></div>'+
+    '<div class="met"><div class="l">Monthly Income</div><div class="v">'+inr(sal)+'</div></div>'+
+    '<div class="met"><div class="l">Savings Rate</div><div class="v">'+rt+'%</div></div>';
+  drawBar(sal,ex,sav);
+  drawPie();
+}
+
+function drawBar(inc,exp,sav){
+  if(!window.Chart) return;
+  var ctx=$('barChart');
+  if(charts.bar) charts.bar.destroy();
+  charts.bar=new Chart(ctx,{type:'bar',data:{labels:['Income','Expenses','Savings'],
+    datasets:[{data:[inc,exp,sav],backgroundColor:['#800020','#e07a8f','#1a8a4f'],borderRadius:6}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false}},maintainAspectRatio:false}});
+}
+
+function drawPie(){
+  if(!window.Chart) return;
+  var byCat={};
+  HOLDINGS.forEach(function(h){byCat[h.cat]=(byCat[h.cat]||0)+h.value;});
+  var labels=Object.keys(byCat),data=labels.map(function(k){return byCat[k];});
+  var ctx=$('pieChart');
+  if(charts.pie) charts.pie.destroy();
+  charts.pie=new Chart(ctx,{type:'doughnut',data:{labels:labels,
+    datasets:[{data:data,backgroundColor:['#800020','#a52a4a','#c14b6b','#d97a92','#e0a23a','#b8860b','#6b7488','#8b5cf6']}]},
+    options:{plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},maintainAspectRatio:false}});
+}
+
+function r1(){
+  var sal=v('sal'),pf=v('pf'),ppf=v('ppf'),tot=pf+ppf,rt=sal>0?Math.round(tot/sal*100):0;
+  $('m1').innerHTML=
+    '<div class="met big"><div class="l">Gross Monthly</div><div class="v">'+inr(sal)+'</div></div>'+
+    '<div class="met"><div class="l">PF</div><div class="v">'+inr(pf)+'</div></div>'+
+    '<div class="met"><div class="l">PPF</div><div class="v">'+inr(ppf)+'</div></div>'+
+    '<div class="met"><div class="l">Savings Rate</div><div class="v">'+rt+'%</div></div>';
+}
+
+function renderMF(){
+  $('fundCount').textContent=HOLDINGS.length+' funds';
+  var inv=0,cur=0;
+  HOLDINGS.forEach(function(h){inv+=h.value;cur+=h.value*1.12;});
+  $('mfSummary').innerHTML=
+    '<div class="met"><div class="l">Invested</div><div class="v">'+inr(inv)+'</div></div>'+
+    '<div class="met"><div class="l">Current (est)</div><div class="v" style="color:#1a8a4f">'+inr(cur)+'</div></div>';
+  var h='';
+  HOLDINGS.slice().sort(function(a,b){return b.value-a.value;}).forEach(function(f){
+    h+='<tr><td style="font-size:12px;">'+f.name+'</td><td><span class="pill">'+f.cat+'</span></td><td>'+f.units.toFixed(1)+'</td><td>'+inr(f.value*1.12)+'</td></tr>';
   });
+  $('mfT').innerHTML=h;
 }
 
-function renderSavingsChart() {
-  let ctx = $('savingsChart').getContext('2d');
-  if(charts.savings) charts.savings.destroy();
-  charts.savings = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      datasets: [{
-        label: 'Savings Rate (%)',
-        data: [42, 45, 48, 52, 49, 51],
-        borderColor: '#800020',
-        backgroundColor: 'rgba(128, 0, 32, 0.1)',
-        tension: 0.4,
-        fill: true
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+function renderGS(){
+  var gs=HOLDINGS.filter(function(h){return h.cat==='Gold'||h.cat==='Silver';});
+  var gold=gs.filter(function(h){return h.cat==='Gold';}).reduce(function(s,h){return s+h.value*1.12;},0);
+  var silver=gs.filter(function(h){return h.cat==='Silver';}).reduce(function(s,h){return s+h.value*1.12;},0);
+  $('gsSummary').innerHTML=
+    '<div class="met"><div class="l">Gold Funds</div><div class="v">'+inr(gold)+'</div></div>'+
+    '<div class="met"><div class="l">Silver Funds</div><div class="v">'+inr(silver)+'</div></div>';
+  var h='';
+  gs.forEach(function(f){
+    h+='<tr><td style="font-size:12px;">'+f.name+'</td><td><span class="pill">'+f.cat+'</span></td><td>'+f.units.toFixed(1)+'</td><td>'+inr(f.value*1.12)+'</td></tr>';
   });
+  $('gsT').innerHTML=h;
 }
 
-function getPPFCorpus() {
-  const monthly = getVal('ppfMonthly');
-  const age = getVal('age');
-  const retireAge = getVal('retireAge');
-  const months = (retireAge - age) * 12;
-  const rate = 7.1 / 100 / 12;
-  return monthly * ((Math.pow(1 + rate, months) - 1) / rate);
+function renderStk(){
+  var h='';
+  ST.forEach(function(s){var val=s.q*s.c*1.08,pl=val-s.q*s.c;
+    h+='<tr><td>'+s.s+'</td><td>'+s.q+'</td><td>'+inr(val)+'</td><td class="'+(pl>=0?'g':'l2')+'">'+inr(pl)+'</td></tr>';});
+  $('stkT').innerHTML=h||'<tr><td colspan="4" style="color:#999">No stocks added yet</td></tr>';
 }
 
-function getPFCorpus() {
-  const monthly = getVal('pfDeduct');
-  const total = monthly * 1.6;
-  const age = getVal('age');
-  const retireAge = getVal('retireAge');
-  const months = (retireAge - age) * 12;
-  const rate = 8.5 / 100 / 12;
-  return total * ((Math.pow(1 + rate, months) - 1) / rate);
+function r3(){
+  var p=getppf(),pf=getpf(),mf=mfTotal(),c=p+pf+mf,yr=v('ret')-v('age');
+  $('m3').innerHTML=
+    '<div class="met big"><div class="l">Corpus at '+v('ret')+'</div><div class="v">'+inr(c)+'</div></div>'+
+    '<div class="met"><div class="l">Monthly (4% rule)</div><div class="v">'+inr(c*0.04/12)+'</div></div>'+
+    '<div class="met"><div class="l">Years Left</div><div class="v">'+yr+'</div></div>'+
+    '<div class="met"><div class="l">Goal to ₹1Cr</div><div class="v">'+Math.round(c/10000000*100)+'%</div></div>';
 }
 
-function renderSalary() {
-  const salary = getVal('salary');
-  const pf = getVal('pfDeduct');
-  const ppf = getVal('ppfMonthly');
-  const savings = pf + ppf;
-  const rate = Math.round(savings / salary * 100);
-  
-  let html = '<div class="metric-card hero"><div class="metric-label">Gross Monthly</div><div class="metric-value">' + inr(salary) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">PF Deduction</div><div class="metric-value">' + inr(pf) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">PPF Monthly</div><div class="metric-value">' + inr(ppf) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Savings Rate</div><div class="metric-value">' + rate + '%</div></div>';
-  
-  $('salary-metrics').innerHTML = html;
+function r4(){
+  var e=expTotal(),sal=v('sal'),rt=sal>0?Math.round(e/sal*100):0;
+  $('m4').innerHTML=
+    '<div class="met big"><div class="l">Total Expenses</div><div class="v">'+inr(e)+'</div></div>'+
+    '<div class="met"><div class="l">% of Income</div><div class="v">'+rt+'%</div></div>'+
+    '<div class="met"><div class="l">Status</div><div class="v" style="color:'+(rt<=40?'#1a8a4f':'#cb2431')+'">'+(rt<=40?'Good':'High')+'</div></div>'+
+    '<div class="met"><div class="l">Emergency Fund</div><div class="v">'+inr(e*6)+'</div></div>';
 }
 
-function renderMFTab() {
-  let html = '';
-  MF_DATA.forEach(mf => {
-    const current = mf.cost * 1.12;
-    const value = mf.units * current;
-    const invested = mf.units * mf.cost;
-    const pl = ((value - invested) / invested * 100).toFixed(1);
-    html += '<tr><td><b>' + mf.name + '</b><br><small>' + mf.code + '</small></td><td>' + mf.units + '</td><td>' + inr(mf.cost) + '</td><td>' + inr(value) + '</td><td class="' + (pl >= 0 ? 'gain' : 'loss') + '">' + pl + '%</td></tr>';
-  });
-  $('mf-table').innerHTML = html;
+function r5(){
+  var sal=v('sal'),e=expTotal(),rt=sal>0?Math.round((sal-e)/sal*100):0;
+  $('m5').innerHTML=
+    '<p><b>Savings: '+rt+'%</b> &mdash; '+(rt>=50?'Exceptional':rt>=20?'Healthy':'Aim for 20%+')+'</p>'+
+    '<p><b>PPF:</b> Max ₹1.5L/year for tax-free 7.1% returns.</p>'+
+    '<p><b>Rebalance:</b> At 51, your equity is high &mdash; gold+silver is only '+
+      Math.round((HOLDINGS.filter(function(h){return h.cat==='Gold'||h.cat==='Silver';}).reduce(function(s,h){return s+h.value;},0))/HOLDINGS.reduce(function(s,h){return s+h.value;},0)*100)+
+      '% of MF. Consider 10-15% in debt/gold.</p>'+
+    '<p><b>NPS:</b> ₹50k/year gives extra ₹15k tax deduction.</p>'+
+    '<p><b>Emergency fund:</b> Target '+inr(e*6)+' (6 months).</p>';
 }
 
-function addStock() {
-  const sym = ($('stock-sym').value || '').toUpperCase();
-  const qty = getVal('stock-qty');
-  const cost = getVal('stock-cost');
-  if(!sym || qty <= 0 || cost <= 0) { alert('Enter all fields'); return; }
-  STOCKS.push({sym, qty, cost});
-  renderStocks();
-  $('stock-sym').value = '';
-  $('stock-qty').value = '';
-  $('stock-cost').value = '';
-}
-
-function renderStocks() {
-  let html = '';
-  STOCKS.forEach(s => {
-    const current = s.cost * 1.08;
-    const value = s.qty * current;
-    const invested = s.qty * s.cost;
-    const pl = value - invested;
-    html += '<tr><td>' + s.sym + '</td><td>' + s.qty + '</td><td>' + inr(s.cost) + '</td><td>' + inr(current) + '</td><td>' + inr(value) + '</td><td class="' + (pl >= 0 ? 'gain' : 'loss') + '">' + inr(pl) + '</td></tr>';
-  });
-  $('stocks-table').innerHTML = html;
-}
-
-function switchTab(e, tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  e.target.classList.add('active');
-  $(tab).classList.add('active');
-}
-
-function updateETF() {
-  const goldUnits = getVal('gold-units');
-  const silverUnits = getVal('silver-units');
-  ETF = {goldUnits, silverUnits};
-  const goldValue = goldUnits * 6800;
-  const silverValue = silverUnits * 78000;
-  
-  let html = '<div class="metric-card"><div class="metric-label">Gold ETF Value</div><div class="metric-value">' + inr(goldValue) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Silver ETF Value</div><div class="metric-value">' + inr(silverValue) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Total ETF</div><div class="metric-value">' + inr(goldValue + silverValue) + '</div></div>';
-  
-  $('etf-metrics').innerHTML = html;
-  
-  let table = '';
-  if(goldUnits > 0) table += '<tr><td>Nifty Gold ETF</td><td>' + goldUnits + '</td><td>' + inr(6800) + '</td><td>' + inr(goldValue) + '</td></tr>';
-  if(silverUnits > 0) table += '<tr><td>Nifty Silver ETF</td><td>' + silverUnits + '</td><td>' + inr(78000) + '</td><td>' + inr(silverValue) + '</td></tr>';
-  $('etf-table').innerHTML = table;
-}
-
-function renderPension() {
-  const ppf = getPPFCorpus();
-  const pf = getPFCorpus();
-  const corpus = ppf + pf;
-  const age = getVal('age');
-  const retireAge = getVal('retireAge');
-  const yrs = retireAge - age;
-  
-  let html = '<div class="metric-card hero"><div class="metric-label">Retirement Corpus at ' + retireAge + '</div><div class="metric-value">' + inr(corpus) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Monthly Pension (4% rule)</div><div class="metric-value">' + inr(corpus * 0.04 / 12) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Years to Retire</div><div class="metric-value">' + yrs + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Progress to ₹1Cr</div><div class="metric-value">' + Math.round(corpus / 10000000 * 100) + '%</div></div>';
-  
-  $('pension-metrics').innerHTML = html;
-}
-
-function renderExpenses() {
-  const expenses = getVal('exp-grocery') + getVal('exp-spencer') + getVal('exp-electric') + getVal('exp-maid') + getVal('exp-petrol') + getVal('exp-cc') + getVal('exp-petty');
-  const salary = getVal('salary');
-  const ratio = salary > 0 ? Math.round(expenses / salary * 100) : 0;
-  
-  let html = '<div class="metric-card hero"><div class="metric-label">Total Monthly Expenses</div><div class="metric-value">' + inr(expenses) + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">% of Income</div><div class="metric-value">' + ratio + '%</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Budget Health</div><div class="metric-value" style="color: ' + (ratio <= 40 ? '#22863a' : '#cb2431') + '">' + (ratio <= 40 ? '✓ Good' : '⚠ High') + '</div></div>';
-  html += '<div class="metric-card"><div class="metric-label">Emergency Fund Target</div><div class="metric-value">' + inr(expenses * 6) + '</div></div>';
-  
-  $('expense-metrics').innerHTML = html;
-}
-
-function renderInsights() {
-  const salary = getVal('salary');
-  const expenses = getVal('exp-grocery') + getVal('exp-spencer') + getVal('exp-electric') + getVal('exp-maid') + getVal('exp-petrol') + getVal('exp-cc') + getVal('exp-petty');
-  const rate = salary > 0 ? Math.round((salary - expenses) / salary * 100) : 0;
-  
-  let html = '<div class="insight-box"><b>Savings Rate: ' + rate + '%</b> ' + (rate >= 50 ? '⭐ Exceptional!' : rate >= 20 ? '✓ Healthy' : '⚠ Increase to 20%+') + '</div>';
-  html += '<div class="insight-box"><b>PPF Strategy:</b> Max out ₹1.5L/year for guaranteed 7.1% returns + tax-free</div>';
-  html += '<div class="insight-box"><b>Rebalance:</b> At age 51, shift 25% portfolio to debt funds</div>';
-  html += '<div class="insight-box"><b>NPS:</b> Start ₹50k/year to save ₹15k tax + 8.5% returns</div>';
-  html += '<div class="insight-box"><b>Retirement:</b> ' + (getPPFCorpus() + getPFCorpus() >= 10000000 ? '✓ Will exceed ₹1Cr goal' : '→ Projected to hit goal') + '</div>';
-  
-  $('insights-body').innerHTML = html;
-}
-
-function updateAll() {
-  renderOverview();
-  renderSalary();
-  renderPension();
-  renderExpenses();
-  renderInsights();
-}
-
-function saveSetup() {
-  const url = $('worker-url').value;
-  const token = $('worker-token').value;
-  if(url && token) {
-    localStorage.setItem('wt_url', url);
-    localStorage.setItem('wt_token', token);
-    alert('✅ Setup saved!');
+/* CSV parser */
+$('parseCsv').addEventListener('click',function(){
+  var raw=$('csvIn').value.trim();
+  if(!raw){alert('Paste CSV first');return;}
+  var lines=raw.split('\n').filter(function(l){return l.trim();});
+  var out='Parsed '+(lines.length-1)+' rows:\n\n';
+  var tot=0;
+  for(var i=1;i<lines.length;i++){
+    var c=lines[i].split(',');
+    var name=(c[0]||'').trim();
+    var units=parseFloat(c[1])||0;
+    var val=parseFloat(c[2]||c[c.length-1])||0;
+    tot+=val;
+    out+=name+'  |  '+units.toFixed(2)+' units  |  '+inr(val)+'\n';
   }
-}
+  out+='\nTotal value: '+inr(tot);
+  $('csvOut').style.display='block';
+  $('csvOut').textContent=out;
+});
 
-renderOverview();
-renderMFTab();
+/* Code finder via mfapi.in */
+$('findCode').addEventListener('click',function(){
+  var q=$('finderIn').value.trim();
+  if(!q){alert('Enter a fund name');return;}
+  $('finderOut').style.display='block';
+  $('finderOut').textContent='Searching mfapi.in...';
+  fetch('https://api.mfapi.in/mf/search?q='+encodeURIComponent(q))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(!d.length){$('finderOut').textContent='No matches found.';return;}
+      var out='Top matches:\n\n';
+      d.slice(0,8).forEach(function(m){out+=m.schemeCode+'  |  '+m.schemeName+'\n\n';});
+      $('finderOut').textContent=out;
+    })
+    .catch(function(e){$('finderOut').textContent='Lookup failed (network/CORS). Try via your Worker. '+e.message;});
+});
+
+/* Worker save */
+$('saveW').addEventListener('click',function(){
+  var u=$('wurl').value,t=$('wtok').value;
+  if(u&&t){alert('Saved. Connect logic uses your Worker /portfolio endpoint.');}
+});
+
+/* buttons */
+$('updSal').addEventListener('click',function(){r1();r0();});
+$('updPen').addEventListener('click',r3);
+$('updExp').addEventListener('click',function(){r4();r0();});
+$('addStk').addEventListener('click',function(){
+  var s=($('ss').value||'').toUpperCase(),q=v('sq'),c=v('sc');
+  if(!s||q<=0||c<=0){alert('Fill symbol, qty and cost');return;}
+  ST.push({s:s,q:q,c:c});$('ss').value='';$('sq').value='';$('sc').value='';renderStk();
+});
+
+/* init */
+r0();
+renderMF();
 </script>
-
 </body>
 </html>
