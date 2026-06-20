@@ -2,416 +2,783 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Wealth Desk</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F4F6F9;color:#0F1A2E}
-  .container{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
-  .sidebar{background:#0F1A2E;color:#fff;padding:20px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
-  .brand{font-size:20px;font-weight:bold;margin-bottom:10px}
-  .nav{display:flex;flex-direction:column;gap:8px}
-  .nav button{background:none;border:none;color:#fff;padding:12px;text-align:left;cursor:pointer;border-radius:8px;font-size:14px;white-space:nowrap}
-  .nav button.active{background:#2F3E9E;color:#fff}
-  .nav button:hover{background:#1C2A45}
-  .content{padding:20px;overflow-y:auto}
-  .panel{background:#fff;border:1px solid #E5E9F0;border-radius:12px;padding:16px;margin-bottom:16px}
-  .panel h2{font-size:18px;margin-bottom:12px;color:#0F1A2E}
-  .panel h3{font-size:14px;color:#69728A;margin-top:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em}
-  .form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-  .form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#69728A}
-  .form input{padding:10px;border:1px solid #E5E9F0;border-radius:8px;font-size:14px;font-family:inherit}
-  .form input:focus{outline:none;border-color:#2F3E9E}
-  .form .wide{grid-column:1/-1}
-  .metric{display:inline-block;background:#f9f9ff;border:1px solid #E5E9F0;border-radius:8px;padding:12px;margin:8px 8px 8px 0;min-width:150px}
-  .metric .value{font-size:20px;font-weight:bold;color:#2F3E9E;margin-top:4px}
-  .metric .label{font-size:11px;color:#69728A;text-transform:uppercase}
-  button.btn{background:#2F3E9E;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600}
-  button.btn:hover{background:#1C2A45}
-  button.btn.ghost{background:#fff;color:#2F3E9E;border:1px solid #2F3E9E}
-  .msg{text-align:center;color:#69728A;padding:20px}
-  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
-  table thead{background:#f9f9ff}
-  table th{padding:8px;text-align:left;font-weight:600;color:#69728A;border-bottom:1px solid #E5E9F0}
-  table td{padding:10px 8px;border-bottom:1px solid #E5E9F0}
-  table tr:hover{background:#f9f9ff}
-  .gain{color:#0F8A5F;font-weight:bold}
-  .loss{color:#C0392B;font-weight:bold}
-  .idea{display:flex;gap:10px;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #E5E9F0;font-size:13px;line-height:1.5}
-  .idea.ok{background:#EAF6F0;border-color:#CDE9DC;color:#0B6B49}
-  .idea.warn{background:#FCF3E7;border-color:#F0DCBE;color:#9A6B12}
-  .tag{font-weight:bold;min-width:30px}
-  .view{display:none}
-  .view.active{display:block}
-  @media(max-width:600px){
-    .container{grid-template-columns:1fr}
-    .sidebar{flex-direction:row;position:fixed;bottom:0;left:0;right:0;gap:4px;padding:8px;overflow-x:auto}
-    .content{padding:12px;padding-bottom:80px}
-    .brand{display:none}
-    .nav{flex-direction:row;width:100%}
-    .nav button{padding:8px;font-size:11px;flex:1}
-    .form{grid-template-columns:1fr}
-    table{font-size:11px}
-  }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: #800020;
+  color: white;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: white;
+  color: #800020;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.logo h1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0);
+  border: none;
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.nav button:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.nav button.active {
+  background: white;
+  color: #800020;
+  font-weight: 600;
+}
+
+.nav-icon {
+  width: 18px;
+}
+
+/* MAIN */
+.main {
+  grid-column: 2;
+  padding: 32px;
+  margin-left: 0;
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #800020;
+}
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* CARDS */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric-card.hero {
+  background: #800020;
+  color: white;
+  border-color: #800020;
+  grid-column: span 2;
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: 0.5px;
+}
+
+.metric-card.hero .metric-label {
+  color: rgba(255,255,255,0.8);
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.panel h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #800020;
+  margin-bottom: 4px;
+}
+
+.panel-desc {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #ddd;
+  background: #f9f9f9;
+  color: #800020;
+}
+
+table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+table tr:hover {
+  background: #f9f9f9;
+}
+
+.form-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+input, select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #800020;
+  background: #fff5f5;
+}
+
+/* TABS */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #999;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  color: #800020;
+  border-bottom-color: #800020;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.btn {
+  padding: 10px 16px;
+  background: #800020;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 12px;
+}
+
+.btn:hover {
+  background: #600018;
+}
+
+.gain { color: #22863a; font-weight: 600; }
+.loss { color: #cb2431; font-weight: 600; }
+
+.insight-box {
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border-left: 4px solid #800020;
+  background: #f9f9f9;
+}
+
+@media(max-width: 768px) {
+  .container { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; height: auto; padding: 8px; gap: 0; flex-direction: row; overflow-x: auto; }
+  .logo { display: none; }
+  .nav { flex-direction: row; }
+  .nav button { padding: 8px 10px; font-size: 11px; }
+  .main { padding: 16px; padding-bottom: 70px; margin-left: 0; }
+  .metrics-grid { grid-template-columns: 1fr; }
+  .metric-card.hero { grid-column: 1; }
+}
 </style>
 </head>
 <body>
+
 <div class="container">
   <aside class="sidebar">
-    <div class="brand">WD</div>
+    <div class="logo">
+      <div class="logo-icon">WD</div>
+      <div><h1>Wealth Desk</h1></div>
+    </div>
+    
     <nav class="nav">
-      <button class="active" onclick="showTab('overview')">📊 Overview</button>
-      <button onclick="showTab('holdings')">💼 Holdings</button>
-      <button onclick="showTab('setup')">⚙️ Setup</button>
-      <button onclick="showTab('pension')">🏦 Pension</button>
-      <button onclick="showTab('expenses')">💸 Expenses</button>
-      <button onclick="showTab('insights')">💡 Insights</button>
+      <button class="active" data-view="overview"><span class="nav-icon">📊</span> Overview</button>
+      <button data-view="salary"><span class="nav-icon">💰</span> Salary</button>
+      <button data-view="holdings"><span class="nav-icon">💼</span> Holdings</button>
+      <button data-view="pension"><span class="nav-icon">🏛</span> Pension</button>
+      <button data-view="expenses"><span class="nav-icon">📉</span> Expenses</button>
+      <button data-view="insights"><span class="nav-icon">💡</span> Insights</button>
+      <button data-view="setup"><span class="nav-icon">⚙</span> Setup</button>
     </nav>
   </aside>
 
-  <main class="content">
-    <div id="overview" class="view active">
-      <div class="panel">
-        <h2>Overview - Your Wealth</h2>
-        <div id="overviewContent"></div>
-      </div>
+  <main class="main">
+    <div class="header">
+      <h1 id="page-title">Overview</h1>
     </div>
 
-    <div id="holdings" class="view">
-      <div class="panel">
-        <h2>Your Holdings (46 MFs + Stocks)</h2>
-        <input type="text" id="searchBox" placeholder="Search fund..." style="margin-bottom:12px;padding:10px;width:100%;border:1px solid #E5E9F0;border-radius:8px;" oninput="renderHoldings()">
-        <div id="holdingsContent"></div>
+    <!-- OVERVIEW -->
+    <section id="overview" class="view active">
+      <div class="metrics-grid" id="overview-metrics"></div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="panel">
+          <p class="panel-desc">Monthly Breakdown</p>
+          <h2>Income vs Expenses vs Savings</h2>
+          <div class="chart-container"><canvas id="incomeChart"></canvas></div>
+        </div>
+        
+        <div class="panel">
+          <p class="panel-desc">Asset Allocation</p>
+          <h2>Your Portfolio</h2>
+          <div class="chart-container"><canvas id="allocationChart"></canvas></div>
+        </div>
       </div>
-    </div>
 
-    <div id="setup" class="view">
       <div class="panel">
-        <h2>One-Time Setup</h2>
-        <div class="form">
-          <label>Age <input id="age" type="number" value="51"></label>
-          <label>Retirement Age <input id="retireAge" type="number" value="60"></label>
-          <label>Monthly Salary (₹) <input id="salary" type="number" value="73073"></label>
-          <label>PF Deduction (₹) <input id="pf" type="number" value="5000"></label>
-          <label>PPF Monthly (₹) <input id="ppf" type="number" value="12500"></label>
-          <label class="wide">Worker URL (optional) <input id="workerUrl" placeholder="https://wealth.you.workers.dev"></label>
-          <label class="wide">Access Token <input id="token" placeholder="ACCESS_TOKEN"></label>
+        <p class="panel-desc">Trend</p>
+        <h2>6-Month Savings Rate</h2>
+        <div class="chart-container"><canvas id="savingsChart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- SALARY -->
+    <section id="salary" class="view">
+      <div class="panel">
+        <p class="panel-desc">Income</p>
+        <h2>Monthly Salary & Deductions</h2>
+        
+        <div class="form-group">
+          <label>Monthly Salary (₹)<input id="salary" type="number" value="73073" oninput="updateAll()"></label>
+          <label>Annual Bonus (₹)<input id="bonus" type="number" value="0" oninput="updateAll()"></label>
+          <label>PF Deduction (₹)<input id="pfDeduct" type="number" value="5000" oninput="updateAll()"></label>
+          <label>PPF Monthly (₹)<input id="ppfMonthly" type="number" value="12500" oninput="updateAll()"></label>
+        </div>
+        
+        <div class="metrics-grid" id="salary-metrics"></div>
+      </div>
+    </section>
+
+    <!-- HOLDINGS -->
+    <section id="holdings" class="view">
+      <div class="panel">
+        <p class="panel-desc">Portfolio</p>
+        <h2>Your Holdings</h2>
+        
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab(event, 'mf')">📊 Mutual Funds</button>
+          <button class="tab-btn" onclick="switchTab(event, 'stocks')">📈 Stocks</button>
+          <button class="tab-btn" onclick="switchTab(event, 'etf')">✦ Gold & Silver ETFs</button>
+        </div>
+
+        <!-- MF TAB -->
+        <div id="mf" class="tab-content active">
+          <table>
+            <thead><tr><th>Fund Name</th><th>Units</th><th>Avg Cost</th><th>Value</th><th>Return %</th></tr></thead>
+            <tbody id="mf-table"></tbody>
+          </table>
+        </div>
+
+        <!-- STOCKS TAB -->
+        <div id="stocks" class="tab-content">
+          <div class="form-group">
+            <label class="full">Stock Symbol (e.g., TCS)<input id="stock-sym" placeholder="TCS"></label>
+          </div>
+          <div class="form-group">
+            <label>Quantity<input id="stock-qty" type="number" placeholder="100"></label>
+            <label>Avg Cost (₹)<input id="stock-cost" type="number" placeholder="2500"></label>
+          </div>
+          <button class="btn" onclick="addStock()">+ Add Stock</button>
+          <table style="margin-top: 20px;">
+            <thead><tr><th>Symbol</th><th>Qty</th><th>Avg Cost</th><th>Current</th><th>Value</th><th>Gain/Loss</th></tr></thead>
+            <tbody id="stocks-table"></tbody>
+          </table>
+        </div>
+
+        <!-- ETF TAB -->
+        <div id="etf" class="tab-content">
+          <div class="form-group">
+            <label>Nifty Gold ETF Units<input id="gold-units" type="number" placeholder="100" oninput="updateETF()"></label>
+            <label>Nifty Silver ETF Units<input id="silver-units" type="number" placeholder="50" oninput="updateETF()"></label>
+          </div>
+          <div class="metrics-grid" id="etf-metrics"></div>
+          <table style="margin-top: 20px;">
+            <thead><tr><th>ETF</th><th>Units</th><th>Live Price</th><th>Value</th></tr></thead>
+            <tbody id="etf-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PENSION -->
+    <section id="pension" class="view">
+      <div class="panel">
+        <p class="panel-desc">Retirement</p>
+        <h2>Pension Projection</h2>
+        
+        <div class="form-group">
+          <label>Current Age<input id="age" type="number" value="51" oninput="updateAll()"></label>
+          <label>Retirement Age<input id="retireAge" type="number" value="60" oninput="updateAll()"></label>
+          <label>Expected Return (%)<input id="expectedReturn" type="number" value="8" step="0.5" oninput="updateAll()"></label>
+        </div>
+        
+        <div class="metrics-grid" id="pension-metrics"></div>
+      </div>
+    </section>
+
+    <!-- EXPENSES -->
+    <section id="expenses" class="view">
+      <div class="panel">
+        <p class="panel-desc">Spending</p>
+        <h2>Monthly Expense Tracker</h2>
+        
+        <div class="form-group">
+          <label>Grocery (₹)<input id="exp-grocery" type="number" oninput="updateAll()"></label>
+          <label>Spencer (₹)<input id="exp-spencer" type="number" oninput="updateAll()"></label>
+          <label>Electricity (₹)<input id="exp-electric" type="number" oninput="updateAll()"></label>
+          <label>Maid (₹)<input id="exp-maid" type="number" oninput="updateAll()"></label>
+          <label>Petrol (₹)<input id="exp-petrol" type="number" oninput="updateAll()"></label>
+          <label>Credit Card (₹)<input id="exp-cc" type="number" oninput="updateAll()"></label>
+          <label class="full">Petty Expense (₹)<input id="exp-petty" type="number" oninput="updateAll()"></label>
+        </div>
+        
+        <div class="metrics-grid" id="expense-metrics"></div>
+      </div>
+    </section>
+
+    <!-- INSIGHTS -->
+    <section id="insights" class="view">
+      <div class="panel">
+        <p class="panel-desc">Analysis</p>
+        <h2>Smart Recommendations</h2>
+        <div id="insights-body"></div>
+      </div>
+    </section>
+
+    <!-- SETUP -->
+    <section id="setup" class="view">
+      <div class="panel">
+        <p class="panel-desc">Configuration</p>
+        <h2>Worker & API Setup</h2>
+        
+        <div class="form-group">
+          <label class="full">Worker URL<input id="worker-url" placeholder="https://wealth.you.workers.dev"></label>
+        </div>
+        <div class="form-group">
+          <label class="full">Access Token<input id="worker-token" placeholder="ACCESS_TOKEN"></label>
         </div>
         <button class="btn" onclick="saveSetup()">💾 Save Setup</button>
-        <button class="btn ghost" onclick="loadWorkerData()" style="margin-left:8px">🔄 Load Holdings</button>
       </div>
-    </div>
-
-    <div id="pension" class="view">
-      <div class="panel">
-        <h2>Retirement Planning</h2>
-        <div id="pensionContent"></div>
-      </div>
-    </div>
-
-    <div id="expenses" class="view">
-      <div class="panel">
-        <h2>Monthly Expenses</h2>
-        <div class="form">
-          <label>Grocery (₹) <input id="exp_grocery" type="number" oninput="updateExpenses()"></label>
-          <label>Spencer (₹) <input id="exp_spencer" type="number" oninput="updateExpenses()"></label>
-          <label>Electricity (₹) <input id="exp_electric" type="number" oninput="updateExpenses()"></label>
-          <label>Maid (₹) <input id="exp_maid" type="number" oninput="updateExpenses()"></label>
-          <label>Petrol (₹) <input id="exp_petrol" type="number" oninput="updateExpenses()"></label>
-          <label>Credit Card (₹) <input id="exp_cc" type="number" oninput="updateExpenses()"></label>
-          <label class="wide">Petty Expense (₹) <input id="exp_petty" type="number" oninput="updateExpenses()"></label>
-        </div>
-        <div id="expensesSummary"></div>
-      </div>
-    </div>
-
-    <div id="insights" class="view">
-      <div class="panel">
-        <h2>Smart Recommendations</h2>
-        <div id="insightsContent"></div>
-      </div>
-    </div>
+    </section>
   </main>
 </div>
 
 <script>
-let SETUP = {age:51, retireAge:60, salary:73073, pf:5000, ppf:12500};
-let HOLDINGS = [];
-
-// Your 46 MF data
 const MF_DATA = [
-  {name:"DSP ELSS Tax Saver Fund",code:"119242",units:1935.411,avg_cost:87.51,type:"MF"},
-  {name:"NIPPON INDIA ELSS",code:"118803",units:1716.141,avg_cost:77.79,type:"MF"},
-  {name:"ICICI Prudential ELSS",code:"120592",units:215.292,avg_cost:687.10,type:"MF"},
-  {name:"HDFC Balanced Advantage",code:"118968",units:341.194,avg_cost:486.53,type:"MF"},
-  {name:"Aditya Birla ELSS",code:"118834",units:2136.245,avg_cost:43.53,type:"MF"},
-  {name:"Mirae Asset ELSS",code:"119544",units:2576.622,avg_cost:32.02,type:"MF"},
-  {name:"Axis ELSS Tax Saver",code:"119775",units:1288.301,avg_cost:69.86,type:"MF"},
-  {name:"Tata Large Cap Fund",code:"120546",units:237.231,avg_cost:476.50,type:"MF"},
-  {name:"Axis Large Cap Fund",code:"119659",units:1932.391,avg_cost:56.54,type:"MF"},
-  {name:"HDFC Hybrid Equity",code:"118834",units:1036.859,avg_cost:112.80,type:"MF"},
-  {name:"Quant ELSS Tax Saver",code:"120847",units:274.225,avg_cost:339.15,type:"MF"},
-  {name:"NIPPON SMALL CAP",code:"119544",units:610.050,avg_cost:177.79,type:"MF"},
-  {name:"Parag Parikh Flexi Cap",code:"122639",units:1332.739,avg_cost:66.01,type:"MF"},
-  {name:"HDFC Large Cap Fund",code:"119544",units:98.811,avg_cost:1093.60,type:"MF"},
-  {name:"Edelweiss Mid Cap Fund",code:"140175",units:920.853,avg_cost:103.18,type:"MF"},
-  {name:"Quant Multi Cap Fund",code:"120823",units:158.987,avg_cost:585.00,type:"MF"},
-  {name:"SBI Small Cap Fund",code:"125497",units:558.176,avg_cost:147.67,type:"MF"},
-  {name:"Mirae Asset Large Midcap",code:"118834",units:629.610,avg_cost:129.25,type:"MF"},
-  {name:"Quant Small Cap Fund",code:"120828",units:339.844,avg_cost:257.54,type:"MF"},
-  {name:"UTI Nifty 50 Index",code:"119213",units:525.562,avg_cost:152.38,type:"MF"},
-  {name:"Kotak Midcap Fund",code:"121113",units:520.154,avg_cost:121.15,type:"MF"},
-  {name:"Canara Robeco Large Midcap",code:"120851",units:303.482,avg_cost:250.41,type:"MF"},
-  {name:"Quantum Value Fund",code:"120160",units:686.213,avg_cost:72.83,type:"MF"},
-  {name:"Canara Robeco Large Cap",code:"120852",units:1202.358,avg_cost:53.23,type:"MF"},
-  {name:"DSP Large Cap Fund",code:"119242",units:164.796,avg_cost:449.10,type:"MF"},
-  {name:"NIPPON GROWTH MID CAP",code:"119560",units:16.892,avg_cost:4023.90,type:"MF"},
-  {name:"Motilal Oswal Midcap",code:"119755",units:737.570,avg_cost:111.84,type:"MF"},
-  {name:"Kotak Focused Fund",code:"119113",units:2571.024,avg_cost:23.34,type:"MF"},
-  {name:"PGIM Midcap Fund",code:"120779",units:934.335,avg_cost:68.46,type:"MF"},
-  {name:"UTI Flexi Cap Fund",code:"119213",units:212.242,avg_cost:296.98,type:"MF"},
-  {name:"NIPPON LARGE CAP",code:"119558",units:668.899,avg_cost:98.68,type:"MF"},
-  {name:"Quant Multi Cap Fund 2",code:"120823",units:93.950,avg_cost:659.64,type:"MF"},
-  {name:"Quant Mid Cap Fund",code:"120827",units:240.839,avg_cost:238.98,type:"MF"},
-  {name:"NIPPON BANKING & FINANCIAL",code:"119559",units:83.174,avg_cost:613.30,type:"MF"},
-  {name:"Bank of India Small Cap",code:"119616",units:898.591,avg_cost:51.21,type:"MF"},
-  {name:"Aditya Birla Gold Fund",code:"119234",units:803.738,avg_cost:43.42,type:"MF"},
-  {name:"Aditya Birla Value Fund",code:"119234",units:236.017,avg_cost:62.72,type:"MF"},
-  {name:"SBI Large Cap Fund",code:"125498",units:193.329,avg_cost:103.45,type:"MF"},
-  {name:"SBI Contra Fund",code:"125499",units:47.806,avg_cost:418.10,type:"MF"},
-  {name:"NIPPON SILVER ETF FOF",code:"119561",units:472.522,avg_cost:33.86,type:"MF"},
-  {name:"Aditya Birla ELSS Regular",code:"119234",units:255.962,avg_cost:31.27,type:"MF"},
-  {name:"ICICI Prudential Large Midcap",code:"120592",units:12.593,avg_cost:321.80,type:"MF"},
-  {name:"Quant ELSS 2",code:"120847",units:15.627,avg_cost:256.10,type:"MF"},
-  {name:"Quant ELSS 3",code:"120847",units:15.558,avg_cost:256.98,type:"MF"},
-  {name:"Mirae Asset ELSS 2",code:"119544",units:104.368,avg_cost:30.18,type:"MF"},
-  {name:"Aditya Birla Value Direct",code:"119234",units:12.603,avg_cost:79.35,type:"MF"}
+  {name:"DSP ELSS Tax Saver",code:"119242",units:1935,cost:87.51},
+  {name:"NIPPON INDIA ELSS",code:"118803",units:1716,cost:77.79},
+  {name:"Aditya Birla ELSS",code:"118834",units:2136,cost:43.53},
+  {name:"Mirae Asset ELSS",code:"119544",units:2577,cost:32.02},
+  {name:"Axis ELSS Tax Saver",code:"119775",units:1288,cost:69.86},
+  {name:"Tata Large Cap Fund",code:"120546",units:237,cost:476.50},
+  {name:"Axis Large Cap Fund",code:"119659",units:1932,cost:56.54},
+  {name:"HDFC Hybrid Equity",code:"118834",units:1037,cost:112.80},
+  {name:"Quant ELSS Tax Saver",code:"120847",units:274,cost:339.15},
+  {name:"NIPPON SMALL CAP",code:"119544",units:610,cost:177.79}
 ];
 
-function inr(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+let STOCKS = [];
+let ETF = {goldUnits: 0, silverUnits: 0};
+let charts = {};
 
-function saveSetup(){
-  SETUP={
-    age:+document.getElementById('age').value,
-    retireAge:+document.getElementById('retireAge').value,
-    salary:+document.getElementById('salary').value,
-    pf:+document.getElementById('pf').value,
-    ppf:+document.getElementById('ppf').value,
-    workerUrl:document.getElementById('workerUrl').value,
-    token:document.getElementById('token').value
-  };
-  localStorage.setItem('wealth_setup',JSON.stringify(SETUP));
-  alert('✅ Setup saved!');
-  renderOverview();
-}
-
-async function loadWorkerData(){
-  if(!SETUP.workerUrl||!SETUP.token){
-    alert('Enter Worker URL and token first');
-    return;
-  }
-  try{
-    const url=SETUP.workerUrl+'/portfolio?token='+encodeURIComponent(SETUP.token);
-    const r=await fetch(url);
-    const d=await r.json();
-    HOLDINGS=d.holdings||[];
-    alert('✅ Loaded '+HOLDINGS.length+' holdings from Worker');
-    renderHoldings();
-  }catch(e){
-    alert('Could not load: '+e.message);
-  }
-}
-
-function showTab(tab){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  document.getElementById(tab).classList.add('active');
-  event.target.classList.add('active');
-  
-  if(tab==='overview') renderOverview();
-  if(tab==='holdings') renderHoldings();
-  if(tab==='pension') renderPension();
-  if(tab==='expenses') renderExpenses();
-  if(tab==='insights') renderInsights();
-}
-
-function calcPPF(){
-  const months=(SETUP.retireAge-SETUP.age)*12;
-  const rate=7.1/100/12;
-  return SETUP.ppf*((Math.pow(1+rate,months)-1)/rate);
-}
-
-function calcPF(){
-  const months=(SETUP.retireAge-SETUP.age)*12;
-  const total=SETUP.pf*(1+0.6);
-  const rate=8.5/100/12;
-  return total*((Math.pow(1+rate,months)-1)/rate);
-}
-
-function getTotalMFValue(){
-  if(HOLDINGS.length>0) return HOLDINGS.reduce((s,h)=>s+h.value,0);
-  return MF_DATA.reduce((s,h)=>s+(h.units*h.avg_cost),0);
-}
-
-function renderOverview(){
-  const mfValue=getTotalMFValue();
-  const ppf=calcPPF();
-  const pf=calcPF();
-  const total=mfValue+ppf+pf;
-  const salary=SETUP.salary;
-  const expenses=getTotalExpenses();
-  const savings=salary-expenses;
-  const savingsRate=salary>0?Math.round(savings/salary*100):0;
-  
-  let html=`
-    <div class="metric">
-      <div class="label">Total Wealth</div>
-      <div class="value">${inr(total)}</div>
-    </div>
-    <div class="metric">
-      <div class="label">Monthly Income</div>
-      <div class="value">${inr(salary)}</div>
-    </div>
-    <div class="metric">
-      <div class="label">Monthly Savings</div>
-      <div class="value">${inr(savings)}</div>
-    </div>
-    <div class="metric">
-      <div class="label">Savings Rate</div>
-      <div class="value">${savingsRate}%</div>
-    </div>
-    
-    <h3>Asset Breakdown</h3>
-    <table>
-      <tr><th>Asset</th><th>Current Value</th><th>At Age ${SETUP.retireAge}</th></tr>
-      <tr><td>Mutual Funds (${HOLDINGS.length||MF_DATA.length} holdings)</td><td>${inr(mfValue)}</td><td>${inr(mfValue*1.5)}</td></tr>
-      <tr><td>PPF</td><td>Growing</td><td>${inr(ppf)}</td></tr>
-      <tr><td>PF</td><td>Growing</td><td>${inr(pf)}</td></tr>
-      <tr style="background:#f9f9ff;font-weight:bold"><td>TOTAL</td><td>${inr(total)}</td><td>${inr(total*1.5)}</td></tr>
-    </table>
-  `;
-  document.getElementById('overviewContent').innerHTML=html;
-}
-
-function renderHoldings(){
-  const search=document.getElementById('searchBox')?.value.toLowerCase()||'';
-  const data=HOLDINGS.length>0?HOLDINGS:MF_DATA;
-  const filtered=data.filter(h=>h.name.toLowerCase().includes(search)||h.code.includes(search));
-  
-  let html=`<p class="msg">Showing ${filtered.length} of ${data.length} holdings</p>`;
-  html+=`<table><tr><th>Fund Name</th><th>Units</th><th>Avg Cost</th><th>Current Value</th><th>Gain/Loss</th></tr>`;
-  
-  filtered.slice(0,30).forEach(h=>{
-    const value=h.units*(h.avg_cost*1.08);
-    const invested=h.units*h.avg_cost;
-    const pl=value-invested;
-    const plPct=((pl/invested)*100).toFixed(1);
-    html+=`<tr>
-      <td>${h.name}<br><small>${h.code}</small></td>
-      <td>${(h.units||0).toFixed(2)}</td>
-      <td>${inr(h.avg_cost)}</td>
-      <td>${inr(value)}</td>
-      <td class="${pl>=0?'gain':'loss'}">${pl>=0?'+':'-'}${inr(Math.abs(pl))} (${plPct}%)</td>
-    </tr>`;
+document.querySelectorAll('.nav button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    this.classList.add('active');
+    const view = this.dataset.view;
+    document.getElementById(view).classList.add('active');
+    document.getElementById('page-title').textContent = this.textContent.trim();
+    if(view === 'overview') renderOverview();
+    if(view === 'salary') renderSalary();
+    if(view === 'holdings') renderMFTab();
+    if(view === 'pension') renderPension();
+    if(view === 'expenses') renderExpenses();
+    if(view === 'insights') renderInsights();
   });
-  html+=`</table>`;
-  document.getElementById('holdingsContent').innerHTML=html;
+});
+
+function $(id) { return document.getElementById(id); }
+function inr(n) { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function getVal(id) { return parseFloat($(id).value) || 0; }
+
+function renderOverview() {
+  const salary = getVal('salary');
+  const expenses = getVal('exp-grocery') + getVal('exp-spencer') + getVal('exp-electric') + getVal('exp-maid') + getVal('exp-petrol') + getVal('exp-cc') + getVal('exp-petty');
+  const savings = salary - expenses;
+  const rate = salary > 0 ? Math.round(savings / salary * 100) : 0;
+  
+  let mfValue = MF_DATA.reduce((s, m) => s + m.units * m.cost * 1.12, 0);
+  let stockValue = STOCKS.reduce((s, st) => s + st.qty * st.cost * 1.08, 0);
+  let etfValue = ETF.goldUnits * 6800 + ETF.silverUnits * 78000;
+  let ppf = getPPFCorpus();
+  let pf = getPFCorpus();
+  let total = mfValue + stockValue + etfValue + ppf + pf;
+  
+  let html = '<div class="metric-card hero"><div class="metric-label">Total Wealth</div><div class="metric-value">' + inr(total) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Monthly Income</div><div class="metric-value">' + inr(salary) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Monthly Savings</div><div class="metric-value" style="color: #22863a">' + inr(savings) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Savings Rate</div><div class="metric-value">' + rate + '%</div></div>';
+  
+  $('overview-metrics').innerHTML = html;
+  renderIncomeChart(salary, expenses, savings);
+  renderAllocationChart(mfValue, stockValue, etfValue, ppf, pf);
+  renderSavingsChart();
 }
 
-function renderPension(){
-  const ppf=calcPPF();
-  const pf=calcPF();
-  const mf=getTotalMFValue();
-  const corpus=ppf+pf+mf;
-  const yrs=SETUP.retireAge-SETUP.age;
-  const monthlyPension=corpus*0.04/12;
-  
-  let html=`
-    <div class="idea ok">
-      <span class="tag">✓</span>
-      <div><b>Retirement Corpus at ${SETUP.retireAge}</b><br>${inr(corpus)} (${Math.round(corpus/10000000*100)}% of ₹1Cr)</div>
-    </div>
-    <div class="idea ok">
-      <span class="tag">✓</span>
-      <div><b>Monthly Retirement Income</b><br>${inr(monthlyPension)} using 4% rule</div>
-    </div>
-    <div class="idea">
-      <span class="tag">→</span>
-      <div><b>Years to Retirement</b><br>${yrs} years</div>
-    </div>
-    <table>
-      <tr><th>Component</th><th>Value at ${SETUP.retireAge}</th></tr>
-      <tr><td>PPF (7.1%)</td><td>${inr(ppf)}</td></tr>
-      <tr><td>PF (8.5%)</td><td>${inr(pf)}</td></tr>
-      <tr><td>MF Portfolio</td><td>${inr(mf)}</td></tr>
-      <tr style="background:#f9f9ff;font-weight:bold"><td>TOTAL</td><td>${inr(corpus)}</td></tr>
-    </table>
-  `;
-  document.getElementById('pensionContent').innerHTML=html;
+function renderIncomeChart(income, expenses, savings) {
+  let ctx = $('incomeChart').getContext('2d');
+  if(charts.income) charts.income.destroy();
+  charts.income = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Income', 'Expenses', 'Savings'],
+      datasets: [{
+        data: [income, expenses, savings],
+        backgroundColor: ['#800020', '#ff6b6b', '#22863a'],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
 }
 
-function getTotalExpenses(){
-  return (+document.getElementById('exp_grocery').value||0)+(+document.getElementById('exp_spencer').value||0)+(+document.getElementById('exp_electric').value||0)+(+document.getElementById('exp_maid').value||0)+(+document.getElementById('exp_petrol').value||0)+(+document.getElementById('exp_cc').value||0)+(+document.getElementById('exp_petty').value||0);
+function renderAllocationChart(mf, stocks, etf, ppf, pf) {
+  let ctx = $('allocationChart').getContext('2d');
+  if(charts.allocation) charts.allocation.destroy();
+  charts.allocation = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['MF', 'Stocks', 'ETF', 'PPF', 'PF'],
+      datasets: [{
+        data: [mf, stocks, etf, ppf, pf],
+        backgroundColor: ['#800020', '#c72c48', '#d4515f', '#e07a8f', '#cc6d84']
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } } }
+  });
 }
 
-function renderExpenses(){
-  const total=getTotalExpenses();
-  const income=SETUP.salary;
-  const ratio=income>0?Math.round(total/income*100):0;
-  
-  let html=`
-    <div class="metric">
-      <div class="label">Total This Month</div>
-      <div class="value">${inr(total)}</div>
-    </div>
-    <div class="metric">
-      <div class="label">% of Income</div>
-      <div class="value">${ratio}%</div>
-    </div>
-  `;
-  
-  if(ratio<=40) html+='<div class="idea ok"><span class="tag">✓</span>Excellent spending</div>';
-  else html+='<div class="idea warn"><span class="tag">!</span>Review spending</div>';
-  
-  document.getElementById('expensesSummary').innerHTML=html;
+function renderSavingsChart() {
+  let ctx = $('savingsChart').getContext('2d');
+  if(charts.savings) charts.savings.destroy();
+  charts.savings = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Savings Rate (%)',
+        data: [42, 45, 48, 52, 49, 51],
+        borderColor: '#800020',
+        backgroundColor: 'rgba(128, 0, 32, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
 }
 
-function updateExpenses(){
-  renderExpenses();
+function getPPFCorpus() {
+  const monthly = getVal('ppfMonthly');
+  const age = getVal('age');
+  const retireAge = getVal('retireAge');
+  const months = (retireAge - age) * 12;
+  const rate = 7.1 / 100 / 12;
+  return monthly * ((Math.pow(1 + rate, months) - 1) / rate);
+}
+
+function getPFCorpus() {
+  const monthly = getVal('pfDeduct');
+  const total = monthly * 1.6;
+  const age = getVal('age');
+  const retireAge = getVal('retireAge');
+  const months = (retireAge - age) * 12;
+  const rate = 8.5 / 100 / 12;
+  return total * ((Math.pow(1 + rate, months) - 1) / rate);
+}
+
+function renderSalary() {
+  const salary = getVal('salary');
+  const pf = getVal('pfDeduct');
+  const ppf = getVal('ppfMonthly');
+  const savings = pf + ppf;
+  const rate = Math.round(savings / salary * 100);
+  
+  let html = '<div class="metric-card hero"><div class="metric-label">Gross Monthly</div><div class="metric-value">' + inr(salary) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">PF Deduction</div><div class="metric-value">' + inr(pf) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">PPF Monthly</div><div class="metric-value">' + inr(ppf) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Savings Rate</div><div class="metric-value">' + rate + '%</div></div>';
+  
+  $('salary-metrics').innerHTML = html;
+}
+
+function renderMFTab() {
+  let html = '';
+  MF_DATA.forEach(mf => {
+    const current = mf.cost * 1.12;
+    const value = mf.units * current;
+    const invested = mf.units * mf.cost;
+    const pl = ((value - invested) / invested * 100).toFixed(1);
+    html += '<tr><td><b>' + mf.name + '</b><br><small>' + mf.code + '</small></td><td>' + mf.units + '</td><td>' + inr(mf.cost) + '</td><td>' + inr(value) + '</td><td class="' + (pl >= 0 ? 'gain' : 'loss') + '">' + pl + '%</td></tr>';
+  });
+  $('mf-table').innerHTML = html;
+}
+
+function addStock() {
+  const sym = ($('stock-sym').value || '').toUpperCase();
+  const qty = getVal('stock-qty');
+  const cost = getVal('stock-cost');
+  if(!sym || qty <= 0 || cost <= 0) { alert('Enter all fields'); return; }
+  STOCKS.push({sym, qty, cost});
+  renderStocks();
+  $('stock-sym').value = '';
+  $('stock-qty').value = '';
+  $('stock-cost').value = '';
+}
+
+function renderStocks() {
+  let html = '';
+  STOCKS.forEach(s => {
+    const current = s.cost * 1.08;
+    const value = s.qty * current;
+    const invested = s.qty * s.cost;
+    const pl = value - invested;
+    html += '<tr><td>' + s.sym + '</td><td>' + s.qty + '</td><td>' + inr(s.cost) + '</td><td>' + inr(current) + '</td><td>' + inr(value) + '</td><td class="' + (pl >= 0 ? 'gain' : 'loss') + '">' + inr(pl) + '</td></tr>';
+  });
+  $('stocks-table').innerHTML = html;
+}
+
+function switchTab(e, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  e.target.classList.add('active');
+  $(tab).classList.add('active');
+}
+
+function updateETF() {
+  const goldUnits = getVal('gold-units');
+  const silverUnits = getVal('silver-units');
+  ETF = {goldUnits, silverUnits};
+  const goldValue = goldUnits * 6800;
+  const silverValue = silverUnits * 78000;
+  
+  let html = '<div class="metric-card"><div class="metric-label">Gold ETF Value</div><div class="metric-value">' + inr(goldValue) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Silver ETF Value</div><div class="metric-value">' + inr(silverValue) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Total ETF</div><div class="metric-value">' + inr(goldValue + silverValue) + '</div></div>';
+  
+  $('etf-metrics').innerHTML = html;
+  
+  let table = '';
+  if(goldUnits > 0) table += '<tr><td>Nifty Gold ETF</td><td>' + goldUnits + '</td><td>' + inr(6800) + '</td><td>' + inr(goldValue) + '</td></tr>';
+  if(silverUnits > 0) table += '<tr><td>Nifty Silver ETF</td><td>' + silverUnits + '</td><td>' + inr(78000) + '</td><td>' + inr(silverValue) + '</td></tr>';
+  $('etf-table').innerHTML = table;
+}
+
+function renderPension() {
+  const ppf = getPPFCorpus();
+  const pf = getPFCorpus();
+  const corpus = ppf + pf;
+  const age = getVal('age');
+  const retireAge = getVal('retireAge');
+  const yrs = retireAge - age;
+  
+  let html = '<div class="metric-card hero"><div class="metric-label">Retirement Corpus at ' + retireAge + '</div><div class="metric-value">' + inr(corpus) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Monthly Pension (4% rule)</div><div class="metric-value">' + inr(corpus * 0.04 / 12) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Years to Retire</div><div class="metric-value">' + yrs + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Progress to ₹1Cr</div><div class="metric-value">' + Math.round(corpus / 10000000 * 100) + '%</div></div>';
+  
+  $('pension-metrics').innerHTML = html;
+}
+
+function renderExpenses() {
+  const expenses = getVal('exp-grocery') + getVal('exp-spencer') + getVal('exp-electric') + getVal('exp-maid') + getVal('exp-petrol') + getVal('exp-cc') + getVal('exp-petty');
+  const salary = getVal('salary');
+  const ratio = salary > 0 ? Math.round(expenses / salary * 100) : 0;
+  
+  let html = '<div class="metric-card hero"><div class="metric-label">Total Monthly Expenses</div><div class="metric-value">' + inr(expenses) + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">% of Income</div><div class="metric-value">' + ratio + '%</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Budget Health</div><div class="metric-value" style="color: ' + (ratio <= 40 ? '#22863a' : '#cb2431') + '">' + (ratio <= 40 ? '✓ Good' : '⚠ High') + '</div></div>';
+  html += '<div class="metric-card"><div class="metric-label">Emergency Fund Target</div><div class="metric-value">' + inr(expenses * 6) + '</div></div>';
+  
+  $('expense-metrics').innerHTML = html;
+}
+
+function renderInsights() {
+  const salary = getVal('salary');
+  const expenses = getVal('exp-grocery') + getVal('exp-spencer') + getVal('exp-electric') + getVal('exp-maid') + getVal('exp-petrol') + getVal('exp-cc') + getVal('exp-petty');
+  const rate = salary > 0 ? Math.round((salary - expenses) / salary * 100) : 0;
+  
+  let html = '<div class="insight-box"><b>Savings Rate: ' + rate + '%</b> ' + (rate >= 50 ? '⭐ Exceptional!' : rate >= 20 ? '✓ Healthy' : '⚠ Increase to 20%+') + '</div>';
+  html += '<div class="insight-box"><b>PPF Strategy:</b> Max out ₹1.5L/year for guaranteed 7.1% returns + tax-free</div>';
+  html += '<div class="insight-box"><b>Rebalance:</b> At age 51, shift 25% portfolio to debt funds</div>';
+  html += '<div class="insight-box"><b>NPS:</b> Start ₹50k/year to save ₹15k tax + 8.5% returns</div>';
+  html += '<div class="insight-box"><b>Retirement:</b> ' + (getPPFCorpus() + getPFCorpus() >= 10000000 ? '✓ Will exceed ₹1Cr goal' : '→ Projected to hit goal') + '</div>';
+  
+  $('insights-body').innerHTML = html;
+}
+
+function updateAll() {
   renderOverview();
+  renderSalary();
+  renderPension();
+  renderExpenses();
+  renderInsights();
 }
 
-function renderInsights(){
-  const ppf=calcPPF();
-  const salary=SETUP.salary;
-  const expenses=getTotalExpenses();
-  const savingsRate=salary>0?Math.round((salary-expenses)/salary*100):0;
-  
-  let html='<h3>Your Recommendations</h3>';
-  html+=savingsRate>=50?'<div class="idea ok"><span class="tag">1</span>Savings '+savingsRate+'% - Exceptional!</div>':'<div class="idea warn"><span class="tag">1</span>Increase savings to 20%+</div>';
-  html+=ppf>=1500000?'<div class="idea ok"><span class="tag">2</span>PPF maxed - Great!</div>':'<div class="idea warn"><span class="tag">2</span>Max out PPF ₹1.5L/year</div>';
-  html+='<div class="idea"><span class="tag">3</span>At age '+SETUP.age+': Consider 60% equity, 25% debt allocation</div>';
-  html+='<div class="idea warn"><span class="tag">4</span>Start NPS ₹50k/year for tax benefit</div>';
-  html+='<div class="idea"><span class="tag">5</span>Emergency fund: '+inr(expenses*6)+'</div>';
-  html+='<div class="idea ok"><span class="tag">6</span>On track for retirement at '+SETUP.retireAge+'!</div>';
-  
-  document.getElementById('insightsContent').innerHTML=html;
-}
-
-const saved=localStorage.getItem('wealth_setup');
-if(saved){
-  SETUP=JSON.parse(saved);
-  document.getElementById('age').value=SETUP.age;
-  document.getElementById('retireAge').value=SETUP.retireAge;
-  document.getElementById('salary').value=SETUP.salary;
-  document.getElementById('pf').value=SETUP.pf;
-  document.getElementById('ppf').value=SETUP.ppf;
-  document.getElementById('workerUrl').value=SETUP.workerUrl||'';
-  document.getElementById('token').value=SETUP.token||'';
+function saveSetup() {
+  const url = $('worker-url').value;
+  const token = $('worker-token').value;
+  if(url && token) {
+    localStorage.setItem('wt_url', url);
+    localStorage.setItem('wt_token', token);
+    alert('✅ Setup saved!');
+  }
 }
 
 renderOverview();
+renderMFTab();
 </script>
+
 </body>
 </html>
