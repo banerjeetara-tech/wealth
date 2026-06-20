@@ -9,10 +9,10 @@
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F4F6F9;color:#0F1A2E}
   .container{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
-  .sidebar{background:#0F1A2E;color:#fff;padding:20px;display:flex;flex-direction:column;gap:20px}
+  .sidebar{background:#0F1A2E;color:#fff;padding:20px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
   .brand{font-size:20px;font-weight:bold;margin-bottom:10px}
   .nav{display:flex;flex-direction:column;gap:8px}
-  .nav button{background:none;border:none;color:#fff;padding:12px;text-align:left;cursor:pointer;border-radius:8px;font-size:14px}
+  .nav button{background:none;border:none;color:#fff;padding:12px;text-align:left;cursor:pointer;border-radius:8px;font-size:14px;white-space:nowrap}
   .nav button.active{background:#2F3E9E;color:#fff}
   .nav button:hover{background:#1C2A45}
   .content{padding:20px;overflow-y:auto}
@@ -22,24 +22,26 @@
   .form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
   .form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#69728A}
   .form input{padding:10px;border:1px solid #E5E9F0;border-radius:8px;font-size:14px;font-family:inherit}
-  .form input:focus{outline:none;border-color:#2F3E9E;background:#f9f9ff}
+  .form input:focus{outline:none;border-color:#2F3E9E}
   .form .wide{grid-column:1/-1}
   .metric{display:inline-block;background:#f9f9ff;border:1px solid #E5E9F0;border-radius:8px;padding:12px;margin:8px 8px 8px 0;min-width:150px}
   .metric .value{font-size:20px;font-weight:bold;color:#2F3E9E;margin-top:4px}
   .metric .label{font-size:11px;color:#69728A;text-transform:uppercase}
   button.btn{background:#2F3E9E;color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600}
   button.btn:hover{background:#1C2A45}
+  button.btn.ghost{background:#fff;color:#2F3E9E;border:1px solid #2F3E9E}
   .msg{text-align:center;color:#69728A;padding:20px}
   table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
   table thead{background:#f9f9ff}
   table th{padding:8px;text-align:left;font-weight:600;color:#69728A;border-bottom:1px solid #E5E9F0}
   table td{padding:10px 8px;border-bottom:1px solid #E5E9F0}
   table tr:hover{background:#f9f9ff}
+  .gain{color:#0F8A5F;font-weight:bold}
+  .loss{color:#C0392B;font-weight:bold}
   .idea{display:flex;gap:10px;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #E5E9F0;font-size:13px;line-height:1.5}
   .idea.ok{background:#EAF6F0;border-color:#CDE9DC;color:#0B6B49}
   .idea.warn{background:#FCF3E7;border-color:#F0DCBE;color:#9A6B12}
   .tag{font-weight:bold;min-width:30px}
-  .section{margin-bottom:20px}
   .view{display:none}
   .view.active{display:block}
   @media(max-width:600px){
@@ -50,6 +52,7 @@
     .nav{flex-direction:row;width:100%}
     .nav button{padding:8px;font-size:11px;flex:1}
     .form{grid-template-columns:1fr}
+    table{font-size:11px}
   }
 </style>
 </head>
@@ -59,8 +62,8 @@
     <div class="brand">WD</div>
     <nav class="nav">
       <button class="active" onclick="showTab('overview')">📊 Overview</button>
-      <button onclick="showTab('setup')">⚙️ Setup</button>
       <button onclick="showTab('holdings')">💼 Holdings</button>
+      <button onclick="showTab('setup')">⚙️ Setup</button>
       <button onclick="showTab('pension')">🏦 Pension</button>
       <button onclick="showTab('expenses')">💸 Expenses</button>
       <button onclick="showTab('insights')">💡 Insights</button>
@@ -70,8 +73,16 @@
   <main class="content">
     <div id="overview" class="view active">
       <div class="panel">
-        <h2>Overview - Your Wealth Dashboard</h2>
+        <h2>Overview - Your Wealth</h2>
         <div id="overviewContent"></div>
+      </div>
+    </div>
+
+    <div id="holdings" class="view">
+      <div class="panel">
+        <h2>Your Holdings (46 MFs + Stocks)</h2>
+        <input type="text" id="searchBox" placeholder="Search fund..." style="margin-bottom:12px;padding:10px;width:100%;border:1px solid #E5E9F0;border-radius:8px;" oninput="renderHoldings()">
+        <div id="holdingsContent"></div>
       </div>
     </div>
 
@@ -82,20 +93,13 @@
           <label>Age <input id="age" type="number" value="51"></label>
           <label>Retirement Age <input id="retireAge" type="number" value="60"></label>
           <label>Monthly Salary (₹) <input id="salary" type="number" value="73073"></label>
-          <label>Annual Bonus (₹) <input id="bonus" type="number" value="0"></label>
           <label>PF Deduction (₹) <input id="pf" type="number" value="5000"></label>
           <label>PPF Monthly (₹) <input id="ppf" type="number" value="12500"></label>
-          <label>NPS Monthly (₹) <input id="nps" type="number" value="0"></label>
-          <label>Expected Return (%) <input id="returnRate" type="number" value="8" step="0.5"></label>
+          <label class="wide">Worker URL (optional) <input id="workerUrl" placeholder="https://wealth.you.workers.dev"></label>
+          <label class="wide">Access Token <input id="token" placeholder="ACCESS_TOKEN"></label>
         </div>
         <button class="btn" onclick="saveSetup()">💾 Save Setup</button>
-      </div>
-    </div>
-
-    <div id="holdings" class="view">
-      <div class="panel">
-        <h2>Your Holdings - Auto Calculated</h2>
-        <div id="holdingsContent"></div>
+        <button class="btn ghost" onclick="loadWorkerData()" style="margin-left:8px">🔄 Load Holdings</button>
       </div>
     </div>
 
@@ -132,103 +136,142 @@
 </div>
 
 <script>
-let SETUP = {age:51, retireAge:60, salary:73073, bonus:0, pf:5000, ppf:12500, nps:0, returnRate:8};
+let SETUP = {age:51, retireAge:60, salary:73073, pf:5000, ppf:12500};
+let HOLDINGS = [];
 
-function showTab(tab) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById(tab).classList.add('active');
-  event.target.classList.add('active');
-  
-  if(tab === 'overview') renderOverview();
-  if(tab === 'holdings') renderHoldings();
-  if(tab === 'pension') renderPension();
-  if(tab === 'expenses') renderExpenses();
-  if(tab === 'insights') renderInsights();
-}
+// Your 46 MF data
+const MF_DATA = [
+  {name:"DSP ELSS Tax Saver Fund",code:"119242",units:1935.411,avg_cost:87.51,type:"MF"},
+  {name:"NIPPON INDIA ELSS",code:"118803",units:1716.141,avg_cost:77.79,type:"MF"},
+  {name:"ICICI Prudential ELSS",code:"120592",units:215.292,avg_cost:687.10,type:"MF"},
+  {name:"HDFC Balanced Advantage",code:"118968",units:341.194,avg_cost:486.53,type:"MF"},
+  {name:"Aditya Birla ELSS",code:"118834",units:2136.245,avg_cost:43.53,type:"MF"},
+  {name:"Mirae Asset ELSS",code:"119544",units:2576.622,avg_cost:32.02,type:"MF"},
+  {name:"Axis ELSS Tax Saver",code:"119775",units:1288.301,avg_cost:69.86,type:"MF"},
+  {name:"Tata Large Cap Fund",code:"120546",units:237.231,avg_cost:476.50,type:"MF"},
+  {name:"Axis Large Cap Fund",code:"119659",units:1932.391,avg_cost:56.54,type:"MF"},
+  {name:"HDFC Hybrid Equity",code:"118834",units:1036.859,avg_cost:112.80,type:"MF"},
+  {name:"Quant ELSS Tax Saver",code:"120847",units:274.225,avg_cost:339.15,type:"MF"},
+  {name:"NIPPON SMALL CAP",code:"119544",units:610.050,avg_cost:177.79,type:"MF"},
+  {name:"Parag Parikh Flexi Cap",code:"122639",units:1332.739,avg_cost:66.01,type:"MF"},
+  {name:"HDFC Large Cap Fund",code:"119544",units:98.811,avg_cost:1093.60,type:"MF"},
+  {name:"Edelweiss Mid Cap Fund",code:"140175",units:920.853,avg_cost:103.18,type:"MF"},
+  {name:"Quant Multi Cap Fund",code:"120823",units:158.987,avg_cost:585.00,type:"MF"},
+  {name:"SBI Small Cap Fund",code:"125497",units:558.176,avg_cost:147.67,type:"MF"},
+  {name:"Mirae Asset Large Midcap",code:"118834",units:629.610,avg_cost:129.25,type:"MF"},
+  {name:"Quant Small Cap Fund",code:"120828",units:339.844,avg_cost:257.54,type:"MF"},
+  {name:"UTI Nifty 50 Index",code:"119213",units:525.562,avg_cost:152.38,type:"MF"},
+  {name:"Kotak Midcap Fund",code:"121113",units:520.154,avg_cost:121.15,type:"MF"},
+  {name:"Canara Robeco Large Midcap",code:"120851",units:303.482,avg_cost:250.41,type:"MF"},
+  {name:"Quantum Value Fund",code:"120160",units:686.213,avg_cost:72.83,type:"MF"},
+  {name:"Canara Robeco Large Cap",code:"120852",units:1202.358,avg_cost:53.23,type:"MF"},
+  {name:"DSP Large Cap Fund",code:"119242",units:164.796,avg_cost:449.10,type:"MF"},
+  {name:"NIPPON GROWTH MID CAP",code:"119560",units:16.892,avg_cost:4023.90,type:"MF"},
+  {name:"Motilal Oswal Midcap",code:"119755",units:737.570,avg_cost:111.84,type:"MF"},
+  {name:"Kotak Focused Fund",code:"119113",units:2571.024,avg_cost:23.34,type:"MF"},
+  {name:"PGIM Midcap Fund",code:"120779",units:934.335,avg_cost:68.46,type:"MF"},
+  {name:"UTI Flexi Cap Fund",code:"119213",units:212.242,avg_cost:296.98,type:"MF"},
+  {name:"NIPPON LARGE CAP",code:"119558",units:668.899,avg_cost:98.68,type:"MF"},
+  {name:"Quant Multi Cap Fund 2",code:"120823",units:93.950,avg_cost:659.64,type:"MF"},
+  {name:"Quant Mid Cap Fund",code:"120827",units:240.839,avg_cost:238.98,type:"MF"},
+  {name:"NIPPON BANKING & FINANCIAL",code:"119559",units:83.174,avg_cost:613.30,type:"MF"},
+  {name:"Bank of India Small Cap",code:"119616",units:898.591,avg_cost:51.21,type:"MF"},
+  {name:"Aditya Birla Gold Fund",code:"119234",units:803.738,avg_cost:43.42,type:"MF"},
+  {name:"Aditya Birla Value Fund",code:"119234",units:236.017,avg_cost:62.72,type:"MF"},
+  {name:"SBI Large Cap Fund",code:"125498",units:193.329,avg_cost:103.45,type:"MF"},
+  {name:"SBI Contra Fund",code:"125499",units:47.806,avg_cost:418.10,type:"MF"},
+  {name:"NIPPON SILVER ETF FOF",code:"119561",units:472.522,avg_cost:33.86,type:"MF"},
+  {name:"Aditya Birla ELSS Regular",code:"119234",units:255.962,avg_cost:31.27,type:"MF"},
+  {name:"ICICI Prudential Large Midcap",code:"120592",units:12.593,avg_cost:321.80,type:"MF"},
+  {name:"Quant ELSS 2",code:"120847",units:15.627,avg_cost:256.10,type:"MF"},
+  {name:"Quant ELSS 3",code:"120847",units:15.558,avg_cost:256.98,type:"MF"},
+  {name:"Mirae Asset ELSS 2",code:"119544",units:104.368,avg_cost:30.18,type:"MF"},
+  {name:"Aditya Birla Value Direct",code:"119234",units:12.603,avg_cost:79.35,type:"MF"}
+];
 
-function saveSetup() {
-  SETUP = {
-    age: +document.getElementById('age').value,
-    retireAge: +document.getElementById('retireAge').value,
-    salary: +document.getElementById('salary').value,
-    bonus: +document.getElementById('bonus').value,
-    pf: +document.getElementById('pf').value,
-    ppf: +document.getElementById('ppf').value,
-    nps: +document.getElementById('nps').value,
-    returnRate: +document.getElementById('returnRate').value
+function inr(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+
+function saveSetup(){
+  SETUP={
+    age:+document.getElementById('age').value,
+    retireAge:+document.getElementById('retireAge').value,
+    salary:+document.getElementById('salary').value,
+    pf:+document.getElementById('pf').value,
+    ppf:+document.getElementById('ppf').value,
+    workerUrl:document.getElementById('workerUrl').value,
+    token:document.getElementById('token').value
   };
-  localStorage.setItem('wealth_setup', JSON.stringify(SETUP));
-  alert('✅ Setup saved! Go to Overview to see calculations.');
+  localStorage.setItem('wealth_setup',JSON.stringify(SETUP));
+  alert('✅ Setup saved!');
   renderOverview();
 }
 
-function inr(n) {
-  return '₹' + Math.round(n).toLocaleString('en-IN');
+async function loadWorkerData(){
+  if(!SETUP.workerUrl||!SETUP.token){
+    alert('Enter Worker URL and token first');
+    return;
+  }
+  try{
+    const url=SETUP.workerUrl+'/portfolio?token='+encodeURIComponent(SETUP.token);
+    const r=await fetch(url);
+    const d=await r.json();
+    HOLDINGS=d.holdings||[];
+    alert('✅ Loaded '+HOLDINGS.length+' holdings from Worker');
+    renderHoldings();
+  }catch(e){
+    alert('Could not load: '+e.message);
+  }
 }
 
-function calcPPF() {
-  const months = (SETUP.retireAge - SETUP.age) * 12;
-  const monthly = SETUP.ppf;
-  const rate = 7.1 / 100 / 12;
-  return monthly * ((Math.pow(1+rate, months) - 1) / rate);
+function showTab(tab){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  event.target.classList.add('active');
+  
+  if(tab==='overview') renderOverview();
+  if(tab==='holdings') renderHoldings();
+  if(tab==='pension') renderPension();
+  if(tab==='expenses') renderExpenses();
+  if(tab==='insights') renderInsights();
 }
 
-function calcPF() {
-  const months = (SETUP.retireAge - SETUP.age) * 12;
-  const empContrib = SETUP.pf;
-  const compContrib = empContrib * (8.33/8.5);
-  const total = empContrib + compContrib;
-  const rate = 8.5 / 100 / 12;
-  return total * ((Math.pow(1+rate, months) - 1) / rate);
+function calcPPF(){
+  const months=(SETUP.retireAge-SETUP.age)*12;
+  const rate=7.1/100/12;
+  return SETUP.ppf*((Math.pow(1+rate,months)-1)/rate);
 }
 
-function calcAPY() {
-  const months = 15 * 12;
-  const monthly = 1500;
-  const rate = 8 / 100 / 12;
-  return monthly * ((Math.pow(1+rate, months) - 1) / rate);
+function calcPF(){
+  const months=(SETUP.retireAge-SETUP.age)*12;
+  const total=SETUP.pf*(1+0.6);
+  const rate=8.5/100/12;
+  return total*((Math.pow(1+rate,months)-1)/rate);
 }
 
-function calcNPS() {
-  if(SETUP.nps === 0) return 0;
-  const months = (SETUP.retireAge - SETUP.age) * 12;
-  const rate = SETUP.returnRate / 100 / 12;
-  return SETUP.nps * ((Math.pow(1+rate, months) - 1) / rate);
+function getTotalMFValue(){
+  if(HOLDINGS.length>0) return HOLDINGS.reduce((s,h)=>s+h.value,0);
+  return MF_DATA.reduce((s,h)=>s+(h.units*h.avg_cost),0);
 }
 
-function getTotalExpenses() {
-  return (
-    +document.getElementById('exp_grocery').value || 0 +
-    +document.getElementById('exp_spencer').value || 0 +
-    +document.getElementById('exp_electric').value || 0 +
-    +document.getElementById('exp_maid').value || 0 +
-    +document.getElementById('exp_petrol').value || 0 +
-    +document.getElementById('exp_cc').value || 0 +
-    +document.getElementById('exp_petty').value || 0
-  );
-}
-
-function renderOverview() {
-  const ppf = calcPPF();
-  const pf = calcPF();
-  const apy = calcAPY();
-  const nps = calcNPS();
-  const totalCorpus = ppf + pf + apy + nps;
-  const monthlyIncome = SETUP.salary;
-  const expenses = getTotalExpenses();
-  const savings = monthlyIncome - expenses;
-  const savingsRate = monthlyIncome > 0 ? Math.round(savings/monthlyIncome*100) : 0;
-
-  let html = `
-    <h3>Your Financial Status</h3>
+function renderOverview(){
+  const mfValue=getTotalMFValue();
+  const ppf=calcPPF();
+  const pf=calcPF();
+  const total=mfValue+ppf+pf;
+  const salary=SETUP.salary;
+  const expenses=getTotalExpenses();
+  const savings=salary-expenses;
+  const savingsRate=salary>0?Math.round(savings/salary*100):0;
+  
+  let html=`
     <div class="metric">
-      <div class="label">Total Corpus (at ${SETUP.retireAge})</div>
-      <div class="value">${inr(totalCorpus)}</div>
+      <div class="label">Total Wealth</div>
+      <div class="value">${inr(total)}</div>
     </div>
     <div class="metric">
       <div class="label">Monthly Income</div>
-      <div class="value">${inr(monthlyIncome)}</div>
+      <div class="value">${inr(salary)}</div>
     </div>
     <div class="metric">
       <div class="label">Monthly Savings</div>
@@ -239,151 +282,133 @@ function renderOverview() {
       <div class="value">${savingsRate}%</div>
     </div>
     
-    <h3>Assets Breakdown (Auto-Calculated)</h3>
+    <h3>Asset Breakdown</h3>
     <table>
-      <tr><th>Asset</th><th>Value at ${SETUP.retireAge}</th><th>Rate</th></tr>
-      <tr><td>PPF</td><td>${inr(ppf)}</td><td>7.1% p.a.</td></tr>
-      <tr><td>PF</td><td>${inr(pf)}</td><td>8.5% p.a.</td></tr>
-      <tr><td>APY</td><td>${inr(apy)}</td><td>8% p.a.</td></tr>
-      <tr><td>NPS</td><td>${inr(nps)}</td><td>${SETUP.returnRate}% p.a.</td></tr>
-      <tr style="background:#f9f9ff;font-weight:bold"><td>TOTAL</td><td>${inr(totalCorpus)}</td><td>-</td></tr>
+      <tr><th>Asset</th><th>Current Value</th><th>At Age ${SETUP.retireAge}</th></tr>
+      <tr><td>Mutual Funds (${HOLDINGS.length||MF_DATA.length} holdings)</td><td>${inr(mfValue)}</td><td>${inr(mfValue*1.5)}</td></tr>
+      <tr><td>PPF</td><td>Growing</td><td>${inr(ppf)}</td></tr>
+      <tr><td>PF</td><td>Growing</td><td>${inr(pf)}</td></tr>
+      <tr style="background:#f9f9ff;font-weight:bold"><td>TOTAL</td><td>${inr(total)}</td><td>${inr(total*1.5)}</td></tr>
     </table>
-    
-    <h3>Retirement Income (4% Rule)</h3>
-    <div class="metric">
-      <div class="label">Monthly at ${SETUP.retireAge}</div>
-      <div class="value">${inr(totalCorpus * 0.04 / 12)}</div>
-    </div>
   `;
-  document.getElementById('overviewContent').innerHTML = html;
+  document.getElementById('overviewContent').innerHTML=html;
 }
 
-function renderHoldings() {
-  const ppf = calcPPF();
-  const pf = calcPF();
-  const apy = calcAPY();
-  const nps = calcNPS();
+function renderHoldings(){
+  const search=document.getElementById('searchBox')?.value.toLowerCase()||'';
+  const data=HOLDINGS.length>0?HOLDINGS:MF_DATA;
+  const filtered=data.filter(h=>h.name.toLowerCase().includes(search)||h.code.includes(search));
   
-  let html = `
-    <table>
-      <tr><th>Asset</th><th>Monthly Investment</th><th>Current Value</th><th>At Retirement</th></tr>
-      <tr><td><b>PPF</b><br><small>Public Provident Fund</small></td><td>${inr(SETUP.ppf)}</td><td>Auto-Growing</td><td>${inr(ppf)}</td></tr>
-      <tr><td><b>PF</b><br><small>Provident Fund (+ Employer)</small></td><td>${inr(SETUP.pf + SETUP.pf*0.6)}</td><td>Auto-Growing</td><td>${inr(pf)}</td></tr>
-      <tr><td><b>APY</b><br><small>Atal Pension Yojana (15yr)</small></td><td>₹1,500</td><td>Auto-Growing</td><td>${inr(apy)}</td></tr>
-      <tr><td><b>NPS</b><br><small>National Pension Scheme</small></td><td>${inr(SETUP.nps)}</td><td>Auto-Growing</td><td>${inr(nps)}</td></tr>
-    </table>
-    <p class="msg">💡 All values auto-calculate based on your inputs. No manual entry needed!</p>
-  `;
-  document.getElementById('holdingsContent').innerHTML = html;
+  let html=`<p class="msg">Showing ${filtered.length} of ${data.length} holdings</p>`;
+  html+=`<table><tr><th>Fund Name</th><th>Units</th><th>Avg Cost</th><th>Current Value</th><th>Gain/Loss</th></tr>`;
+  
+  filtered.slice(0,30).forEach(h=>{
+    const value=h.units*(h.avg_cost*1.08);
+    const invested=h.units*h.avg_cost;
+    const pl=value-invested;
+    const plPct=((pl/invested)*100).toFixed(1);
+    html+=`<tr>
+      <td>${h.name}<br><small>${h.code}</small></td>
+      <td>${(h.units||0).toFixed(2)}</td>
+      <td>${inr(h.avg_cost)}</td>
+      <td>${inr(value)}</td>
+      <td class="${pl>=0?'gain':'loss'}">${pl>=0?'+':'-'}${inr(Math.abs(pl))} (${plPct}%)</td>
+    </tr>`;
+  });
+  html+=`</table>`;
+  document.getElementById('holdingsContent').innerHTML=html;
 }
 
-function renderPension() {
-  const ppf = calcPPF();
-  const pf = calcPF();
-  const apy = calcAPY();
-  const nps = calcNPS();
-  const corpus = ppf + pf + apy + nps;
-  const monthlyPension = corpus * 0.04 / 12;
-  const yrsToRetire = SETUP.retireAge - SETUP.age;
+function renderPension(){
+  const ppf=calcPPF();
+  const pf=calcPF();
+  const mf=getTotalMFValue();
+  const corpus=ppf+pf+mf;
+  const yrs=SETUP.retireAge-SETUP.age;
+  const monthlyPension=corpus*0.04/12;
   
-  let html = `
+  let html=`
     <div class="idea ok">
       <span class="tag">✓</span>
-      <div><b>Retirement Corpus at ${SETUP.retireAge}</b><br>${inr(corpus)} (${Math.round(corpus/10000000*100)}% of ₹1Cr goal)</div>
+      <div><b>Retirement Corpus at ${SETUP.retireAge}</b><br>${inr(corpus)} (${Math.round(corpus/10000000*100)}% of ₹1Cr)</div>
     </div>
     <div class="idea ok">
       <span class="tag">✓</span>
-      <div><b>Monthly Retirement Income</b><br>${inr(monthlyPension)} using 4% withdrawal rule</div>
+      <div><b>Monthly Retirement Income</b><br>${inr(monthlyPension)} using 4% rule</div>
     </div>
     <div class="idea">
       <span class="tag">→</span>
-      <div><b>Years to Retirement</b><br>${yrsToRetire} years</div>
+      <div><b>Years to Retirement</b><br>${yrs} years</div>
     </div>
-    
-    <h3>Monthly Contributions Path</h3>
     <table>
-      <tr><th>Contribution</th><th>Amount</th><th>Total/Month</th></tr>
-      <tr><td>Your PF</td><td>${inr(SETUP.pf)}</td><td rowspan="3">${inr(SETUP.pf + SETUP.ppf + SETUP.nps)}</td></tr>
-      <tr><td>PPF</td><td>${inr(SETUP.ppf)}</td></tr>
-      <tr><td>NPS</td><td>${inr(SETUP.nps)}</td></tr>
+      <tr><th>Component</th><th>Value at ${SETUP.retireAge}</th></tr>
+      <tr><td>PPF (7.1%)</td><td>${inr(ppf)}</td></tr>
+      <tr><td>PF (8.5%)</td><td>${inr(pf)}</td></tr>
+      <tr><td>MF Portfolio</td><td>${inr(mf)}</td></tr>
+      <tr style="background:#f9f9ff;font-weight:bold"><td>TOTAL</td><td>${inr(corpus)}</td></tr>
     </table>
   `;
-  document.getElementById('pensionContent').innerHTML = html;
+  document.getElementById('pensionContent').innerHTML=html;
 }
 
-function renderExpenses() {
-  const total = getTotalExpenses();
-  const income = SETUP.salary;
-  const ratio = income > 0 ? Math.round(total/income*100) : 0;
-  
-  let html = `<div class="metric">
-    <div class="label">Total This Month</div>
-    <div class="value">${inr(total)}</div>
-  </div>
-  <div class="metric">
-    <div class="label">% of Income</div>
-    <div class="value">${ratio}%</div>
-  </div>`;
-  
-  if(ratio <= 40) {
-    html += '<div class="idea ok"><span class="tag">✓</span>Excellent spending (under 40%)</div>';
-  } else if(ratio <= 60) {
-    html += '<div class="idea warn"><span class="tag">!</span>Moderate spending</div>';
-  } else {
-    html += '<div class="idea warn"><span class="tag">!</span>High spending - review needed</div>';
-  }
-  
-  document.getElementById('expensesSummary').innerHTML = html;
+function getTotalExpenses(){
+  return (+document.getElementById('exp_grocery').value||0)+(+document.getElementById('exp_spencer').value||0)+(+document.getElementById('exp_electric').value||0)+(+document.getElementById('exp_maid').value||0)+(+document.getElementById('exp_petrol').value||0)+(+document.getElementById('exp_cc').value||0)+(+document.getElementById('exp_petty').value||0);
 }
 
-function updateExpenses() {
+function renderExpenses(){
+  const total=getTotalExpenses();
+  const income=SETUP.salary;
+  const ratio=income>0?Math.round(total/income*100):0;
+  
+  let html=`
+    <div class="metric">
+      <div class="label">Total This Month</div>
+      <div class="value">${inr(total)}</div>
+    </div>
+    <div class="metric">
+      <div class="label">% of Income</div>
+      <div class="value">${ratio}%</div>
+    </div>
+  `;
+  
+  if(ratio<=40) html+='<div class="idea ok"><span class="tag">✓</span>Excellent spending</div>';
+  else html+='<div class="idea warn"><span class="tag">!</span>Review spending</div>';
+  
+  document.getElementById('expensesSummary').innerHTML=html;
+}
+
+function updateExpenses(){
   renderExpenses();
   renderOverview();
 }
 
-function renderInsights() {
-  const ppf = calcPPF();
-  const salary = SETUP.salary;
-  const expenses = getTotalExpenses();
-  const savingsRate = salary > 0 ? Math.round((salary-expenses)/salary*100) : 0;
+function renderInsights(){
+  const ppf=calcPPF();
+  const salary=SETUP.salary;
+  const expenses=getTotalExpenses();
+  const savingsRate=salary>0?Math.round((salary-expenses)/salary*100):0;
   
-  let html = '<h3>Smart Recommendations</h3>';
+  let html='<h3>Your Recommendations</h3>';
+  html+=savingsRate>=50?'<div class="idea ok"><span class="tag">1</span>Savings '+savingsRate+'% - Exceptional!</div>':'<div class="idea warn"><span class="tag">1</span>Increase savings to 20%+</div>';
+  html+=ppf>=1500000?'<div class="idea ok"><span class="tag">2</span>PPF maxed - Great!</div>':'<div class="idea warn"><span class="tag">2</span>Max out PPF ₹1.5L/year</div>';
+  html+='<div class="idea"><span class="tag">3</span>At age '+SETUP.age+': Consider 60% equity, 25% debt allocation</div>';
+  html+='<div class="idea warn"><span class="tag">4</span>Start NPS ₹50k/year for tax benefit</div>';
+  html+='<div class="idea"><span class="tag">5</span>Emergency fund: '+inr(expenses*6)+'</div>';
+  html+='<div class="idea ok"><span class="tag">6</span>On track for retirement at '+SETUP.retireAge+'!</div>';
   
-  html += savingsRate >= 50 ? 
-    '<div class="idea ok"><span class="tag">1</span> Savings rate '+savingsRate+'% - Exceptional! Keep it up</div>' :
-    '<div class="idea warn"><span class="tag">1</span> Increase savings to 20%+ (currently '+savingsRate+'%)</div>';
-  
-  html += ppf >= 1500000 ?
-    '<div class="idea ok"><span class="tag">2</span> PPF maxed at '+inr(ppf)+' - Great!</div>' :
-    '<div class="idea warn"><span class="tag">2</span> Max out PPF ₹1.5L/year</div>';
-  
-  html += SETUP.age >= 50 ?
-    '<div class="idea warn"><span class="tag">3</span> Age '+SETUP.age+': Consider rebalancing to 60% equity, 25% debt</div>' :
-    '<div class="idea ok"><span class="tag">3</span> Asset allocation good for your age</div>';
-  
-  html += SETUP.nps === 0 ?
-    '<div class="idea warn"><span class="tag">4</span> Start NPS ₹50k/year - Tax benefit ₹15k/year</div>' :
-    '<div class="idea ok"><span class="tag">4</span> NPS: '+inr(SETUP.nps)+'/month ongoing</div>';
-  
-  html += '<div class="idea"><span class="tag">5</span> Emergency fund: Save '+inr(expenses*6)+' (6 months expenses)</div>';
-  html += '<div class="idea"><span class="tag">6</span> Section 80C: Use for PPF, Life Insurance, Education</div>';
-  html += '<div class="idea ok"><span class="tag">7</span> On track for retirement at '+SETUP.retireAge+'!</div>';
-  
-  document.getElementById('insightsContent').innerHTML = html;
+  document.getElementById('insightsContent').innerHTML=html;
 }
 
-// Load saved setup
-const saved = localStorage.getItem('wealth_setup');
-if(saved) {
-  SETUP = JSON.parse(saved);
-  document.getElementById('age').value = SETUP.age;
-  document.getElementById('retireAge').value = SETUP.retireAge;
-  document.getElementById('salary').value = SETUP.salary;
-  document.getElementById('bonus').value = SETUP.bonus;
-  document.getElementById('pf').value = SETUP.pf;
-  document.getElementById('ppf').value = SETUP.ppf;
-  document.getElementById('nps').value = SETUP.nps;
-  document.getElementById('returnRate').value = SETUP.returnRate;
+const saved=localStorage.getItem('wealth_setup');
+if(saved){
+  SETUP=JSON.parse(saved);
+  document.getElementById('age').value=SETUP.age;
+  document.getElementById('retireAge').value=SETUP.retireAge;
+  document.getElementById('salary').value=SETUP.salary;
+  document.getElementById('pf').value=SETUP.pf;
+  document.getElementById('ppf').value=SETUP.ppf;
+  document.getElementById('workerUrl').value=SETUP.workerUrl||'';
+  document.getElementById('token').value=SETUP.token||'';
 }
 
 renderOverview();
